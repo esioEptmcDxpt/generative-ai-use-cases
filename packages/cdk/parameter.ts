@@ -17,10 +17,37 @@ const getContext = (app: cdk.App): StackInput => {
 const envs: Record<string, Partial<StackInput>> = {
   // If you want to define an anonymous environment, uncomment the following and the content of cdk.json will be ignored.
   // If you want to define an anonymous environment in parameter.ts, uncomment the following and the content of cdk.json will be ignored.
-  // '': {
-  //   // Parameters for anonymous environment
-  //   // If you want to override the default settings, add the following
-  // },
+  '': {
+    modelRegion: 'ap-northeast-1',
+    modelIds: [
+      'jp.anthropic.claude-sonnet-4-5-20250929-v1:0',
+      'jp.anthropic.claude-haiku-4-5-20251001-v1:0',
+      'jp.amazon.nova-2-lite-v1:0',
+      'openai.gpt-oss-120b-1:0',
+      {
+        modelId: 'us.meta.llama4-maverick-17b-instruct-v1:0',
+        region: 'us-west-2',
+      },
+      {
+        modelId: 'us.meta.llama4-scout-17b-instruct-v1:0',
+        region: 'us-east-1',
+      },
+    ],
+    imageGenerationModelIds: [
+      'amazon.nova-canvas-v1:0',
+      { modelId: 'stability.sd3-5-large-v1:0', region: 'us-west-2' },
+      { modelId: 'stability.stable-image-core-v1:1', region: 'us-west-2' },
+      { modelId: 'stability.stable-image-ultra-v1:1', region: 'us-west-2' },
+    ],
+    videoGenerationModelIds: [
+      'amazon.nova-reel-v1:0',
+      { modelId: 'luma.ray-v2:0', region: 'us-west-2' },
+    ],
+    speechToSpeechModelIds: [
+      { modelId: 'amazon.nova-sonic-v1:0', region: 'us-east-1' },
+    ],
+    allowedSignUpEmailDomains: ['jreast.co.jp'],
+  },
   dev: {
     // Parameters for development environment
   },
