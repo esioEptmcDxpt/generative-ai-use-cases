@@ -17,10 +17,27 @@ const getContext = (app: cdk.App): StackInput => {
 const envs: Record<string, Partial<StackInput>> = {
   // If you want to define an anonymous environment, uncomment the following and the content of cdk.json will be ignored.
   // If you want to define an anonymous environment in parameter.ts, uncomment the following and the content of cdk.json will be ignored.
-  // '': {
-  //   // Parameters for anonymous environment
-  //   // If you want to override the default settings, add the following
-  // },
+  '': {
+    modelRegion: 'ap-northeast-1',
+    modelIds: [
+      'jp.anthropic.claude-sonnet-4-5-20250929-v1:0',
+      'jp.anthropic.claude-haiku-4-5-20251001-v1:0',
+      'jp.amazon.nova-2-lite-v1:0',
+    ],
+    imageGenerationModelIds: ['amazon.nova-canvas-v1:0'],
+    videoGenerationModelIds: ['amazon.nova-reel-v1:0'],
+    agentEnabled: false,
+    agents: [
+      {
+        displayName: 'India-RAG',
+        agentId: 'IEEMKFWEWF',
+        aliasId: 'S9ITNKLZ6V',
+        description: 'RAG agent for india project',
+      },
+    ],
+    inlineAgents: true,
+    selfSignUpEnabled: false,
+  },
   dev: {
     // Parameters for development environment
   },
