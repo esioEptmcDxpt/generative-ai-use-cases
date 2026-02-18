@@ -1062,7 +1062,7 @@ useCaseBuilder:
   myUseCases: マイユースケース
   noMyUseCases: マイユースケースがありません。
   noUpdateContent: 更新内容がありません
-  noUserInput: ユースケースがユーザーの入力を受け付けていません。プ�������ンプトテンプレートに placeholder を追加するか、ファイル添付を ON にしてください。
+  noUserInput: ユースケースがユーザーの入力を受け付けていません。プロンプトテンプレートに placeholder を追加するか、ファイル添付を ON にしてください。
   notExistOrNotShared: このユースケースは存在しないか、共有されていないユースケースです。
   notSharedDescription: このユースケースは共有されていないため、あなたしか利用できません。
   ok: OK
@@ -1128,7 +1128,7 @@ video:
   status:
     completed: 完了
     failed: 失敗
-    finalizing: 終�����中
+    finalizing: 終了中
     inprogress: 処理中
   supportedExtensions: 'サポートされている拡張子: {{acceptedExtensions}}'
   supportedImageDimensions: 'サポートされている画像サイズ: {{supportedDimensions}}'
