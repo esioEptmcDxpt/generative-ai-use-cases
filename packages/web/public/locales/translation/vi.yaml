@@ -310,6 +310,7 @@ dialog:
     message: Nếu bạn rời khỏi trang này, nội dung đã nhập sẽ bị mất. Bạn có chắc chắn muốn rời khỏi?
     title: Thay đổi chưa được lưu
 drawer:
+  sub: 🚅ESIO ver.
   ai_services: Dịch vụ AI
   builder_mode: Chế độ builder
   done: Hoàn thành
@@ -625,7 +626,9 @@ navigation:
   home: Trang chủ
   imageGeneration: Tạo hình ảnh
   promptOptimization: Tối ưu hóa prompt
-  ragChat: RAG Chat
+  ragChat: SIO-AI
+  search: ค้นหาเอกสาร🔎
+  sub: 🚅ESIO ver.
   settings: Cài đặt
   speechRecognition: Nhận dạng giọng nói
   summary: Tóm tắt

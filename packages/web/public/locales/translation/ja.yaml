@@ -385,6 +385,7 @@ dialog:
     message: このページから移動すると、入力内容が失われます。本当に移動しますか？
     title: 入力内容が保存されていません
 drawer:
+  sub: 🚅電気SIO ver.
   ai_services: AI サービス
   builder_mode: ビルダーモード
   done: 完了
@@ -762,7 +763,9 @@ navigation:
   imageGeneration: 画像生成
   meetingMinutes: 議事録生成
   promptOptimization: プロンプト最適化
-  ragChat: RAG チャット
+  ragChat: SIO-AI
+  search: 文書検索🔎
+  sub: 🚅電気SIO ver.
   settings: 設定
   speechRecognition: 音声認識
   summary: 要約

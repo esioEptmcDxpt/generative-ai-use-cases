@@ -65,6 +65,7 @@ const Drawer: React.FC<Props> = (props) => {
           <div>
             {t('drawer.use_cases')}{' '}
             <span className="text-gray-400">{t('drawer.generative_ai')}</span>
+            {t('drawer.sub')}
           </div>
           <PiGear
             className="cursor-pointer text-base text-white"

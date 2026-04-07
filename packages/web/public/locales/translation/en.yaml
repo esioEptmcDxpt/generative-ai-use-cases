@@ -447,6 +447,7 @@ dialog:
     message: If you leave this page, your input will be lost. Are you sure you want to leave?
     title: Unsaved Changes
 drawer:
+  sub: 🚅ESIO ver.
   ai_services: AI Services
   builder_mode: Builder Mode
   done: Done
@@ -916,7 +917,9 @@ navigation:
   imageGeneration: Image Generation
   meetingMinutes: Meeting Minutes
   promptOptimization: Prompt Optimization
-  ragChat: RAG Chat
+  ragChat: SIO-AI
+  search: search🔎
+  sub: 🚅ESIO ver.
   settings: Settings
   speechRecognition: Speech Recognition
   summary: Summary

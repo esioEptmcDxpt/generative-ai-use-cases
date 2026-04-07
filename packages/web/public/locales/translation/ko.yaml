@@ -299,6 +299,7 @@ dialog:
     message: 이 페이지를 떠나면 입력한 내용이 손실됩니다. 정말 이동하시겠습니까?
     title: 저장되지 않은 변경사항
 drawer:
+  sub: 🚅ESIO ver.
   ai_services: AI 서비스
   builder_mode: 빌더 모드
   done: 완료
@@ -493,7 +494,9 @@ navigation:
   imageGeneration: 이미지 생성
   meetingMinutes: 회의록
   promptOptimization: 프롬프트 최적화
-  ragChat: RAG 채팅
+  ragChat: SIO-AI
+  search: 문서 검색🔎
+  sub: 🚅ESIO ver.
   settings: 설정
   speechRecognition: 음성 인식
   summary: 요약

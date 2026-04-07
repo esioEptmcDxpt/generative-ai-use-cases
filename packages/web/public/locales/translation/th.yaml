@@ -312,6 +312,7 @@ dialog:
     message: หากคุณออกจากหน้านี้ ข้อมูลที่ป้อนจะสูญหาย คุณแน่ใจหรือไม่ว่าต้องการออก?
     title: การเปลี่ยนแปลงที่ยังไม่ได้บันทึก
 drawer:
+  sub: 🚅ESIO ver.
   ai_services: บริการ AI
   builder_mode: Builder Mode
   generative_ai: Generative AI
@@ -642,7 +643,9 @@ navigation:
   imageGeneration: การสร้างภาพ
   meetingMinutes: รายงานการประชุม
   promptOptimization: ปรับแต่ง Prompt ให้ตรงความต้องการ
-  ragChat: RAG Chat
+  ragChat: SIO-AI
+  search: ค้นหาเอกสาร🔎
+  sub: 🚅ESIO ver.
   settings: ตั้งค่า
   speechRecognition: แปลงเสียงพูดเป็นข้อความ
   summary: สรุป

@@ -236,6 +236,7 @@ dialog:
     message: 如果离开此页面，您输入的内容将丢失。确定要离开吗？
     title: 未保存的更改
 drawer:
+  sub: 🚅ESIO ver.
   ai_services: AI 服务
   builder_mode: 构建者模式
   generative_ai: (生成式 AI)
@@ -530,7 +531,9 @@ navigation:
   imageGeneration: 图像生成
   meetingMinutes: 会议纪要
   promptOptimization: 提示优化
-  ragChat: RAG聊天
+  ragChat: SIO-AI
+  search: 文档搜索🔎
+  sub: 🚅ESIO ver.
   settings: 设置
   speechRecognition: 语音识别
   summary: 摘要

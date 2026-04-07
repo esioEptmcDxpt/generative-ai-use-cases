@@ -17,12 +17,219 @@ const getContext = (app: cdk.App): StackInput => {
 const envs: Record<string, Partial<StackInput>> = {
   // If you want to define an anonymous environment, uncomment the following and the content of cdk.json will be ignored.
   // If you want to define an anonymous environment in parameter.ts, uncomment the following and the content of cdk.json will be ignored.
-  // '': {
+
+  '': {
   //   // Parameters for anonymous environment
   //   // If you want to override the default settings, add the following
-  // },
-  dev: {
+    // 本番境用のパラメーター
+    // account: '326497581172',
+    // region: 'ap-northeast-1',
+    //cloudfront: {
+    //distributionId: 'E1KFW6C4JGJUB6',
+    // domainName: 'd2pye9lkf1lyw0.cloudfront.net',
+    modelRegion: 'us-west-2',
+    modelIds: [
+      'global.anthropic.claude-sonnet-4-6',
+      'global.anthropic.claude-sonnet-4-5-20250929-v1:0',
+      'global.anthropic.claude-haiku-4-5-20251001-v1:0',
+      'global.anthropic.claude-sonnet-4-20250514-v1:0',
+      'us.amazon.nova-premier-v1:0',
+      'us.amazon.nova-pro-v1:0',
+      'us.amazon.nova-lite-v1:0',
+      'us.amazon.nova-micro-v1:0',
+      'us.meta.llama3-3-70b-instruct-v1:0',
+      'us.meta.llama4-maverick-17b-instruct-v1:0',
+      'us.meta.llama4-scout-17b-instruct-v1:0',
+      'cohere.command-r-plus-v1:0',
+      'cohere.command-r-v1:0',
+      'us.mistral.pixtral-large-2502-v1:0',
+      //'mistral.mistral-large-2407-v1:0',
+      'mistral.mistral-large-3-675b-instruct',
+      'openai.gpt-oss-120b-1:0',
+      ],
+    imageGenerationModelIds: [
+      'stability.stable-image-ultra-v1:1',
+      'stability.sd3-5-large-v1:0',
+      'stability.stable-image-core-v1:1',
+      // 'amazon.titan-image-generator-v2:0',
+      // 'amazon.titan-image-generator-v1',
+      {
+        modelId: 'amazon.nova-canvas-v1:0',
+        region: 'ap-northeast-1',
+      },
+    ],
+    videoGenerationModelIds: [
+      'luma.ray-v2:0',
+      //{
+      //  modelId: 'amazon.nova-reel-v1:1',
+      //  region: 'ap-northeast-1',
+      //},
+    ],
+    speechToSpeechModelIds: [
+      {
+        modelId: 'amazon.nova-sonic-v1:0',
+        region: 'ap-northeast-1',
+      },
+    ],
+    ragEnabled: true,
+    kendraIndexArn:
+      'arn:aws:kendra:ap-northeast-1:326497581172:index/3ce313b7-4bfb-4257-8127-11db308dfdbe',
+    kendraDataSourceBucketName: 'jre-regulations',
+    kendraIndexLanguage: 'ja',
+    ragKnowledgeBaseEnabled: false,
+    //ragKnowledgeBaseId: 'PQSVG6HETU',
+    //ragKnowledgeBaseStandbyReplicas: false,
+    //ragKnowledgeBaseAdvancedParsing: false,
+    //ragKnowledgeBaseAdvancedParsingModelId:
+      //'anthropic.claude-3-sonnet-20240229-v1:0',
+    // queryDecompositionEnabled: true,
+    embeddingModelId: 'amazon.titan-embed-text-v2:0',
+    allowedSignUpEmailDomains: ['jreast.co.jp'],
     // Parameters for development environment
+    // エージェント設定を追加
+    inlineAgents: true,
+    agentEnabled: true,
+    agents: [
+      {
+        displayName: 'データ分析屋さん',
+        agentId: 'TWU9YT34HX',
+        aliasId: 'MULPCVZTCS',
+        description:'Test',
+      },
+      {
+        displayName: '安全エージェント',
+        agentId: '9JNBPBZAXJ',
+        aliasId: 'WNGLTT9I4L',
+        description:'Test',
+      },
+      {
+        displayName: '電力事故記事エージェント',
+        agentId: 'L8T3RJSWOU',
+        aliasId: 'HF5RVNOSWJ',
+        description:'Test',
+      },
+      {
+        displayName: '電力審査エージェント',
+        agentId: 'XRTHRHNZ2M',
+        aliasId: '3KYC8URE9G',
+        description:'Test',
+      },
+      {
+        displayName: '配電エージェント',
+        agentId: '48ZHU6N3VY',
+        aliasId: 'S3P2GGSK9U',
+        description:'Test',
+      },
+    ],    
+  },
+
+  dev: {
+    // 開発環境用のパラメーター
+    // account: '326497581172',
+    // region: 'ap-northeast-1',
+    //cloudfront: {
+    //distributionId: 'E1KFW6C4JGJUB6',
+    // domainName: 'd2pye9lkf1lyw0.cloudfront.net',
+    modelRegion: 'us-west-2',
+    modelIds: [
+      'global.anthropic.claude-sonnet-4-6',
+      'global.anthropic.claude-sonnet-4-5-20250929-v1:0',
+      'global.anthropic.claude-haiku-4-5-20251001-v1:0',
+      'global.anthropic.claude-sonnet-4-20250514-v1:0',
+      'us.amazon.nova-premier-v1:0',
+      'us.amazon.nova-pro-v1:0',
+      'us.amazon.nova-lite-v1:0',
+      'us.amazon.nova-micro-v1:0',
+      'us.meta.llama3-3-70b-instruct-v1:0',
+      'us.meta.llama4-maverick-17b-instruct-v1:0',
+      'us.meta.llama4-scout-17b-instruct-v1:0',
+      'cohere.command-r-plus-v1:0',
+      'cohere.command-r-v1:0',
+      'us.mistral.pixtral-large-2502-v1:0',
+      //'mistral.mistral-large-2407-v1:0',
+      'mistral.mistral-large-3-675b-instruct',
+      'openai.gpt-oss-120b-1:0',
+      ],
+    imageGenerationModelIds: [
+      'stability.stable-image-ultra-v1:1',
+      'stability.sd3-5-large-v1:0',
+      'stability.stable-image-core-v1:1',
+      // 'amazon.titan-image-generator-v2:0',
+      // 'amazon.titan-image-generator-v1',
+      {
+        modelId: 'amazon.nova-canvas-v1:0',
+        region: 'ap-northeast-1',
+      },
+    ],
+    videoGenerationModelIds: [
+      'luma.ray-v2:0',
+      //{
+      //  modelId: 'amazon.nova-reel-v1:1',
+      //  region: 'ap-northeast-1',
+      //},
+    ],
+    speechToSpeechModelIds: [
+      {
+        modelId: 'amazon.nova-sonic-v1:0',
+        region: 'ap-northeast-1',
+      },
+    ],
+    ragEnabled: true,
+    kendraIndexArn:
+      'arn:aws:kendra:ap-northeast-1:326497581172:index/3ce313b7-4bfb-4257-8127-11db308dfdbe',
+    kendraDataSourceBucketName: 'jre-regulations',
+    kendraIndexLanguage: 'ja',
+    ragKnowledgeBaseEnabled: false,
+    //ragKnowledgeBaseId: 'PQSVG6HETU',
+    //ragKnowledgeBaseStandbyReplicas: false,
+    //ragKnowledgeBaseAdvancedParsing: false,
+    //ragKnowledgeBaseAdvancedParsingModelId:
+      //'anthropic.claude-3-sonnet-20240229-v1:0',
+    // queryDecompositionEnabled: true,
+    embeddingModelId: 'amazon.titan-embed-text-v2:0',
+    allowedSignUpEmailDomains: ['jreast.co.jp'],
+    // Parameters for development environment
+    // エージェント設定を追加
+    inlineAgents: true,
+    agentEnabled: true,
+    agents: [
+      {
+        displayName: 'データ分析屋さん',
+        agentId: 'TWU9YT34HX',
+        aliasId: 'MULPCVZTCS',
+        description:'Test',
+      },
+      {
+        displayName: '安全エージェント',
+        agentId: '9JNBPBZAXJ',
+        aliasId: 'WNGLTT9I4L',
+        description:'Test',
+      },
+      {
+        displayName: '電力事故記事エージェント',
+        agentId: 'L8T3RJSWOU',
+        aliasId: 'HF5RVNOSWJ',
+        description:'Test',
+      },
+      {
+        displayName: '電力審査エージェント',
+        agentId: 'XRTHRHNZ2M',
+        aliasId: '3KYC8URE9G',
+        description:'Test',
+      },
+      {
+        displayName: '配電エージェント',
+        agentId: '48ZHU6N3VY',
+        aliasId: 'S3P2GGSK9U',
+        description:'Test',
+      },
+      {
+        displayName: 'テストエージェント',
+        agentId: '1XAZB124TE',
+        aliasId: '4AFCUE6L06',
+        description:'',
+      },
+    ],    
   },
   staging: {
     // Parameters for staging environment

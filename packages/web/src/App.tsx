@@ -105,7 +105,8 @@ const App: React.FC = () => {
           to: '/rag',
           icon: <PiChatCircleText />,
           display: 'usecase' as const,
-          sub: 'Amazon Kendra',
+          //sub: 'Amazon Kendra',
+          sub: t('navigation.search'),
         }
       : null,
     ragKnowledgeBaseEnabled
