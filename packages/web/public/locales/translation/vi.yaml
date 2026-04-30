@@ -32,6 +32,52 @@ chat:
   system_prompt: System prompt
   title: Chat
   view_prompt_examples: Xem ví dụ prompt
+claude:
+  SIO:
+    prompt: |-
+      # Hướng dẫn
+      Bạn là người viết biên bản cuộc họp có kinh nghiệm. Vui lòng tạo biên bản cuộc họp Teams bằng cách sử dụng bản ghi trong <transcript>. Vì cuộc họp này không có chương trình nghị sự được cung cấp, bạn cần suy luận cấu trúc cuộc họp từ nội dung bản ghi.
+      ## Đầu vào
+      Bản ghi: Văn bản được cung cấp trong <transcript>
+      ## Nhiệm vụ
+      1. Đọc bản ghi được cung cấp trong <transcript> và xác định các chủ đề chính và điểm thảo luận của cuộc họp.
+      2. Tạo biên bản cuộc họp với cấu trúc logic dựa trên các chủ đề đã xác định.
+      3. Đối với mỗi chủ đề, cố gắng bao gồm các thông tin sau:
+      - Các điểm thảo luận chính
+      - Quyết định quan trọng (nếu có)
+      - Các mục hành động tiếp theo (nếu có)
+      4. Về người phát biểu:
+      - Liệt kê tên và đơn vị của mỗi người phát biểu, và tóm tắt phát biểu của họ. (nếu biết)
+      5. Trong suốt biên bản cuộc họp, chú ý đến các điểm sau:
+      - Sử dụng câu văn ngắn gọn và rõ ràng
+      - Nhấn mạnh các điểm quan trọng
+      - Tóm tắt để thể hiện dòng chảy của cuộc thảo luận
+      6. Xuất ở định dạng Markdown, sử dụng các cấp độ tiêu đề và dấu đầu dòng phù hợp để định dạng dễ đọc.
+      7. Ở cuối biên bản, liệt kê các quyết định chính (nếu có) và các mục hành động cho lần sau (nếu có).
+      ## Định dạng đầu ra
+      Tạo biên bản cuộc họp ở định dạng Markdown theo cấu trúc sau:
+      # Biên bản cuộc họp [Tên cuộc họp được suy luận]
+      Ngày giờ: [Ngày được suy luận từ bản ghi]
+      Địa điểm: Cuộc họp Teams
+      ## 1. [Chủ đề đã xác định 1]
+      [Tóm tắt nội dung]
+      ## 2. [Chủ đề đã xác định 2]
+      [Tóm tắt nội dung]
+      ...
+      ## Các quyết định chính
+      - [Quyết định 1]
+      - [Quyết định 2]
+      ...
+      ## Các mục hành động cho lần sau
+      - [Mục hành động 1]
+      - [Mục hành động 2]
+      ...
+      <transcript>
+      ～Sao chép và dán văn bản phiên âm vào đây～
+      </transcript>
+    systemContext: Bạn là chuyên gia tạo biên bản cuộc họp từ văn bản phiên âm âm thanh hội nghị trực tuyến.
+    teams: Phiên âm Teams → Tạo biên bản cuộc họp
+    title: Mẫu đề xuất SIO điện
 common:
   cancel: Hủy
   clear: Xóa
@@ -656,6 +702,8 @@ rag:
   filter: Bộ lọc
   filter_settings: Về cài đặt bộ lọc, vui lòng tham khảo
   here: Tại đây
+  kendraonly: Để chỉ thực hiện tìm kiếm Amazon Kendra
+  kendrasearch: Khi nhập tin nhắn, Amazon Kendra sẽ tìm kiếm tài liệu và LLM tạo câu trả lời dựa trên các tài liệu đã tìm thấy.
   knowledgeBase:
     noDocuments: >-
       Không tìm thấy tài liệu tham khảo. Vui lòng kiểm tra các điều sau:
@@ -673,11 +721,20 @@ rag:
     - Tài liệu mục tiêu đã được thêm vào nguồn dữ liệu của Amazon Kendra chưa
     - Nguồn dữ liệu của Amazon Kendra đã được đồng bộ chưa
     - Hãy thử thay đổi cách diễn đạt đầu vào
+  notitledoc: Tài liệu không có tiêu đề
   no_settings_found: Không tìm thấy cài đặt.
+  modelselect: Lựa chọn mô hình AI
+  modelselectcan: Bạn có thể chọn mô hình AI từ hộp chọn
   page: Trang
   please_refer: Vui lòng tham khảo.
+  ragcan: Bạn có thể trò chuyện bằng phương pháp RAG (Retrieval Augmented Generation).
+  recmodel: Mô hình được đề xuất
   retrieving: Đang lấy tài liệu tham khảo từ Kendra...
-  title: RAG Chat
+  searchresult: Kết quả tìm kiếm
+  speed: Loại tốc độ
+  strong: Loại đa năng
+  title: SIO-AI (Hệ thống Tìm kiếm Tài liệu AI)
+  tr: <Tham khảo> Tên đã được thay đổi từ tháng 4 năm 2025. Tên cũ： Power AI Chat
 research:
   description: Thực hiện các nhiệm vụ nghiên cứu đa dạng trên các ngành công nghiệp bằng cách sử dụng tìm kiếm web và tạo báo cáo nghiên cứu chi tiết.
   general_research: Nghiên cứu chung

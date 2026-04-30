@@ -323,6 +323,16 @@ Output the title enclosed in <output></output> tags.`;
   promptList: (t: TFunction): PromptList => {
     return [
       {
+        title: t('claude.SIO.title'),
+        items: [
+          {
+            title: t('claude.SIO.teams'),
+            systemContext: t('claude.SIO.systemContext'),
+            prompt: t('claude.SIO.prompt'),
+          },
+        ],
+      },
+      {
         title: t('claude.contentGeneration.title', { ns: 'prompts' }),
         items: [
           {

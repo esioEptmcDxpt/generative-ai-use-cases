@@ -157,6 +157,52 @@ chat:
   system_prompt: System Prompt
   title: Chat
   view_prompt_examples: View Prompt Examples
+claude:
+  SIO:
+    prompt: |-
+      # Instructions
+      You are an experienced meeting minutes writer. Please create meeting minutes for a Teams meeting using the transcript in <transcript>. Since no agenda has been provided for this meeting, you will need to infer the meeting structure from the transcript content.
+      ## Input
+      Transcript: Text provided in <transcript>
+      ## Tasks
+      1. Read the transcript provided in <transcript> and identify the main topics and discussion points of the meeting.
+      2. Create meeting minutes with a logical structure based on the identified topics.
+      3. For each topic, try to include the following information:
+      - Main discussion points
+      - Important decisions (if any)
+      - Next action items (if any)
+      4. Regarding speakers:
+      - List each speaker's name and affiliation, and summarize their statements. (if known)
+      5. Throughout the meeting minutes, pay attention to the following:
+      - Use concise and clear sentences
+      - Emphasize important points
+      - Summarize to show the flow of discussion
+      6. Output in Markdown format, using appropriate heading levels and bullet points to format it in a readable way.
+      7. At the end of the minutes, list the main decisions (if any) and action items for next time (if any).
+      ## Output Format
+      Create meeting minutes in Markdown format following this structure:
+      # [Inferred Meeting Name] Meeting Minutes
+      Date: [Date inferred from transcript]
+      Location: Teams Meeting
+      ## 1. [Identified Topic 1]
+      [Summary of content]
+      ## 2. [Identified Topic 2]
+      [Summary of content]
+      ...
+      ## Main Decisions
+      - [Decision 1]
+      - [Decision 2]
+      ...
+      ## Action Items for Next Time
+      - [Action Item 1]
+      - [Action Item 2]
+      ...
+      <transcript>
+      ～Copy and paste transcription text here～
+      </transcript>
+    systemContext: You are an expert at creating meeting minutes from transcribed text of web conference audio.
+    teams: Teams Transcription → Meeting Minutes Creation
+    title: Electric SIO Recommended Samples
 common:
   add: Add
   arrow: →
@@ -954,6 +1000,8 @@ rag:
   filter: Filter
   filter_settings: For filter settings, please refer to
   here: here
+  kendraonly: To execute only Amazon Kendra search
+  kendrasearch: When a message is entered, Amazon Kendra searches for documents and the LLM generates a response based on the searched documents.
   knowledgeBase:
     noDocuments: >-
       No reference documents found. Please consider the following actions:
@@ -970,6 +1018,9 @@ rag:
       - Verify that the embeddingModelId specified in cdk.json is enabled in
       Amazon Bedrock ({{region}})
     retrieving: Retrieving reference documents from Knowledge Base...
+  searchresult: Search Results
+  modelselect: AI Model Selection
+  modelselectcan: You can select an AI model from the select box
   noDocuments: >-
     No reference documents found. Please consider the following actions:
 
@@ -978,12 +1029,18 @@ rag:
 
     - Verify that the Amazon Kendra data source has been synced
 
-    - Try changing the expression of your input
+    - Try changing the expression of your input,
+  notitledoc: Untitled Document
   no_settings_found: 'No settings found. You can add filters by customizing '
   page: page
   please_refer: .
+  ragcan: You can chat using the RAG (Retrieval Augmented Generation) method.
+  recmodel: Recommended Model
   retrieving: Retrieving reference documents from Kendra...
-  title: RAG Chat
+  speed: Speed Type
+  strong: Versatile Type
+  title: SIO-AI (AI Document Search System)
+  tr: <Reference> The name has been changed since April 2025. Previous name 「Power AI Chat」
 research:
   description: Conducts various research tasks across industries using web search and creates detailed research reports.
   general_research: General Research

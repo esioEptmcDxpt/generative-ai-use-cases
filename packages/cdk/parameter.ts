@@ -33,7 +33,7 @@ const envs: Record<string, Partial<StackInput>> = {
       'global.anthropic.claude-sonnet-4-5-20250929-v1:0',
       'global.anthropic.claude-haiku-4-5-20251001-v1:0',
       'global.anthropic.claude-sonnet-4-20250514-v1:0',
-      'us.amazon.nova-premier-v1:0',
+      //'us.amazon.nova-premier-v1:0',
       'us.amazon.nova-pro-v1:0',
       'us.amazon.nova-lite-v1:0',
       'us.amazon.nova-micro-v1:0',
@@ -91,33 +91,46 @@ const envs: Record<string, Partial<StackInput>> = {
     agentEnabled: true,
     agents: [
       {
+        // Agent-Name  GenU-Code-Interpreter
         displayName: 'データ分析屋さん',
         agentId: 'TWU9YT34HX',
-        aliasId: 'MULPCVZTCS',
+        //aliasId: 'MULPCVZTCS',
+        aliasId: 'PKPA2E3CU3',
         description:'Test',
       },
       {
+        // Agent-Name  SKAI-PoC-S3
         displayName: '安全エージェント',
-        agentId: '9JNBPBZAXJ',
-        aliasId: 'WNGLTT9I4L',
+        //agentId: '9JNBPBZAXJ',
+        //aliasId: 'WNGLTT9I4L',
+        agentId: 'NTXEI7ZSO8',
+        aliasId: 'MGFGYGSJLI',
         description:'Test',
       },
       {
+        // Agent-Name  electrical-safety-knowledge-base-oregon-S3
         displayName: '電力事故記事エージェント',
-        agentId: 'L8T3RJSWOU',
-        aliasId: 'HF5RVNOSWJ',
+        //agentId: 'L8T3RJSWOU',
+        //aliasId: 'HF5RVNOSWJ',
+        agentId: 'EBX6OF1U1W',
+        aliasId: 'FIPXQ48M3Z',
         description:'Test',
       },
       {
+        // Agent-Name  SIO_TRRAG-S3
         displayName: '電力審査エージェント',
-        agentId: 'XRTHRHNZ2M',
-        aliasId: '3KYC8URE9G',
+        //agentId: 'XRTHRHNZ2M',
+        //aliasId: '3KYC8URE9G',
+        agentId: 'LVKYAB7ZL7',
+        aliasId: 'OITUMHKLRG',
         description:'Test',
       },
       {
+        // Agent-Name  SIO_power_distribution
         displayName: '配電エージェント',
         agentId: '48ZHU6N3VY',
-        aliasId: 'S3P2GGSK9U',
+        //aliasId: 'S3P2GGSK9U',
+        aliasId: '45RHZKMHVT',
         description:'Test',
       },
     ],    
@@ -136,7 +149,7 @@ const envs: Record<string, Partial<StackInput>> = {
       'global.anthropic.claude-sonnet-4-5-20250929-v1:0',
       'global.anthropic.claude-haiku-4-5-20251001-v1:0',
       'global.anthropic.claude-sonnet-4-20250514-v1:0',
-      'us.amazon.nova-premier-v1:0',
+      //'us.amazon.nova-premier-v1:0',
       'us.amazon.nova-pro-v1:0',
       'us.amazon.nova-lite-v1:0',
       'us.amazon.nova-micro-v1:0',
@@ -194,40 +207,47 @@ const envs: Record<string, Partial<StackInput>> = {
     agentEnabled: true,
     agents: [
       {
+        // Agent-Name  GenU-Code-Interpreter
         displayName: 'データ分析屋さん',
         agentId: 'TWU9YT34HX',
-        aliasId: 'MULPCVZTCS',
+        //aliasId: 'MULPCVZTCS',
+        aliasId: 'PKPA2E3CU3',
         description:'Test',
       },
       {
+        // Agent-Name  SKAI-PoC-S3
         displayName: '安全エージェント',
-        agentId: '9JNBPBZAXJ',
-        aliasId: 'WNGLTT9I4L',
+        //agentId: '9JNBPBZAXJ',
+        //aliasId: 'WNGLTT9I4L',
+        agentId: 'NTXEI7ZSO8',
+        aliasId: 'MGFGYGSJLI',
         description:'Test',
       },
       {
+        // Agent-Name  electrical-safety-knowledge-base-oregon-S3
         displayName: '電力事故記事エージェント',
-        agentId: 'L8T3RJSWOU',
-        aliasId: 'HF5RVNOSWJ',
+        //agentId: 'L8T3RJSWOU',
+        //aliasId: 'HF5RVNOSWJ',
+        agentId: 'EBX6OF1U1W',
+        aliasId: 'FIPXQ48M3Z',
         description:'Test',
       },
       {
+        // Agent-Name  SIO_TRRAG-S3
         displayName: '電力審査エージェント',
-        agentId: 'XRTHRHNZ2M',
-        aliasId: '3KYC8URE9G',
+        //agentId: 'XRTHRHNZ2M',
+        //aliasId: '3KYC8URE9G',
+        agentId: 'LVKYAB7ZL7',
+        aliasId: 'OITUMHKLRG',
         description:'Test',
       },
       {
+        // Agent-Name  SIO_power_distribution
         displayName: '配電エージェント',
         agentId: '48ZHU6N3VY',
-        aliasId: 'S3P2GGSK9U',
+        //aliasId: 'S3P2GGSK9U',
+        aliasId: '45RHZKMHVT',
         description:'Test',
-      },
-      {
-        displayName: 'テストエージェント',
-        agentId: '1XAZB124TE',
-        aliasId: '4AFCUE6L06',
-        description:'',
       },
     ],    
   },

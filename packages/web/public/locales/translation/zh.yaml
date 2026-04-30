@@ -29,6 +29,52 @@ chat:
   show_system_prompt: 显示系统提示
   system_prompt: 系统提示
   title: 聊天
+claude:
+  SIO:
+    prompt: |-
+      # 指示
+      您是一位经验丰富的会议纪要撰写者。请使用<transcript>中的记录创建Teams会议纪要。由于本次会议没有提供议程，您需要从记录内容中推断会议结构。
+      ## 输入
+      记录：<transcript>中提供的文本
+      ## 任务
+      1. 阅读<transcript>中提供的记录，识别会议的主要主题和讨论要点。
+      2. 根据识别的主题创建具有逻辑结构的会议纪要。
+      3. 对于每个主题，尽量包含以下信息：
+      - 主要讨论要点
+      - 重要决定事项（如果有）
+      - 下一步行动项（如果有）
+      4. 关于发言人：
+      - 列出每位发言人的姓名和所属单位，并总结发言内容。（如果知道）
+      5. 在整个会议纪要中，注意以下几点：
+      - 使用简洁明了的句子
+      - 强调重要要点
+      - 总结以显示讨论的流程
+      6. 以Markdown格式输出，使用适当的标题级别和项目符号，以便于阅读的方式进行格式化。
+      7. 在纪要末尾，列出主要决定事项（如果有）和下次的行动项（如果有）。
+      ## 输出格式
+      以Markdown格式创建会议纪要，遵循以下结构：
+      # [推断的会议名称] 会议纪要
+      日期时间：[从记录中推断的日期]
+      地点：Teams会议
+      ## 1. [识别的主题1]
+      [内容摘要]
+      ## 2. [识别的主题2]
+      [内容摘要]
+      ...
+      ## 主要决定事项
+      - [决定事项1]
+      - [决定事项2]
+      ...
+      ## 下次行动项
+      - [行动项1]
+      - [行动项2]
+      ...
+      <transcript>
+      ～在此复制粘贴转录文本～
+      </transcript>
+    systemContext: 您是从网络会议音频转录文本创建会议纪要的专家。
+    teams: Teams转录 → 创建会议纪要
+    title: 电气SIO推荐样本
 common:
   cancel: 取消
   clear: 清除
@@ -560,6 +606,8 @@ rag:
   filter: 过滤器
   filter_settings: 关于过滤器设置，请参考
   here: 这里
+  kendraonly: 如果仅执行 Amazon Kendra 搜索
+  kendrasearch: 输入消息后，Amazon Kendra 会搜索文档，LLM 会根据搜索到的文档生成回答。
   knowledgeBase:
     noDocuments: >-
       未找到参考文档。请确认以下内容： - 目标文档是否已添加到Knowledge Base的数据源中 - Knowledge Base的数据源是否已同步
@@ -571,23 +619,20 @@ rag:
   noDocuments: >-
     未找到参考文档。请确认以下内容： - 目标文档是否已添加到Amazon Kendra的数据源中 - Amazon Kendra的数据源是否已同步 -
     尝试改变输入表达方式
+  notitledoc: 无标题文档 
   no_settings_found: 未找到设置。
+  modelselect: AI模型选择
+  modelselectcan: 可以在选择框中选择AI模型
   page: 页面
   please_refer: 请参考。
+  ragcan: 可以进行 RAG (Retrieval Augmented Generation) 方法的聊天。
+  recmodel: 推荐模型
   retrieving: 正在从Kendra获取参考文档...
-  title: RAG聊天
-research:
-  description: 使用网络搜索进行跨行业的各种研究任务，并创建详细的研究报告。
-  general_research: 一般调查
-  general_research_desc: 调查广泛领域的信息并提供综合分析
-  label: 研究
-  mini_research: 快速调查
-  mini_research_desc: 快速调查要点并提供简洁的答案
-  select_mode: 选择模式
-  start_conversation: 开始与研究代理对话
-  technical_research: 技术调查
-  technical_research_desc: 进行详细的技术调查和分析
-  title: 研究
+  searchresult: 搜索结果
+  speed: 速度型
+  strong: 全能型
+  title: SIO-AI (AI文档检索系统)
+  tr: ＜参考＞自2025年4月起更改名称。原名称：电力AI聊天
 setting:
   ai_items:
     agent_name: Agent名称
