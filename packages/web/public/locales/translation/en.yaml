@@ -139,6 +139,7 @@ chat:
   delete_confirmation: Delete Confirmation
   delete_link: Delete Link
   delete_link_message: You can stop sharing the conversation history by deleting the link.
+  disclaimer: AI chat responses are not always accurate. Please verify important information.
   drop_files: Drop files here
   hint_cmd_enter: ⌘ + Enter to Submit
   hint_ctrl_enter: Ctrl + Enter to Submit

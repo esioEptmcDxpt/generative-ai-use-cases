@@ -14,6 +14,7 @@ chat:
   delete_confirmation: 删除确认
   delete_link: 删除链接
   delete_link_message: 通过删除链接，您可以停止公开对话历史。
+  disclaimer: AI聊天的回答不一定总是正确的。请务必确认重要信息。
   drop_files: 请拖放文件
   history: 对话历史
   initialize: 初始化

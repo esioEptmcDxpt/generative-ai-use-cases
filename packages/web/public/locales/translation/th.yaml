@@ -14,6 +14,7 @@ chat:
   delete_confirmation: ยืนยันการลบ
   delete_link: ลบลิงก์
   delete_link_message: คุณสามารถหยุดการแชร์ประวัติการสนทนาโดยการลบลิงก์
+  disclaimer: คำตอบจาก AI แชทไม่ได้ถูกต้องเสมอไป โปรดตรวจสอบข้อมูลที่สำคัญ
   drop_files: วางไฟล์ที่นี่
   hint_cmd_enter: ⌘ + Enter เพื่อส่ง
   hint_ctrl_enter: Ctrl + Enter เพื่อส่ง

@@ -128,6 +128,7 @@ chat:
   delete_confirmation: 削除確認
   delete_link: リンクの削除
   delete_link_message: リンクを削除することで、会話履歴の公開を停止できます。
+  disclaimer: AIチャットの回答は必ずしも正しいとは限りません。重要な情報は確認するようにしてください。
   drop_files: ファイルをドロップしてください
   hint_cmd_enter: ⌘ + Enter で送信
   hint_ctrl_enter: Ctrl + Enter で送信

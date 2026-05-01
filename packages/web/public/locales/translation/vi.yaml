@@ -14,6 +14,7 @@ chat:
   delete_confirmation: Xác nhận xóa
   delete_link: Xóa liên kết
   delete_link_message: Bằng cách xóa liên kết, bạn có thể ngừng công khai lịch sử cuộc trò chuyện.
+  disclaimer: Câu trả lời của AI chat không phải lúc nào cũng chính xác. Vui lòng xác minh thông tin quan trọng.
   drop_files: Vui lòng thả file
   hint_cmd_enter: ⌘ + Enter để gửi
   hint_ctrl_enter: Ctrl + Enter để gửi
