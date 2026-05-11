@@ -7,6 +7,7 @@ export type FeatureFlags = {
   video?: boolean;
   reasoning?: boolean;
   adaptiveThinking?: boolean;
+  noSamplingParams?: boolean;
 
   image_gen?: boolean;
   video_gen?: boolean;
@@ -24,7 +25,6 @@ export type FeatureFlags = {
 export type ModelConfiguration = {
   modelId: string;
   region: string;
-  inferenceProfileArn?: string;
 };
 
 export type ModelMetadata = {
