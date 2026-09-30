@@ -1028,6 +1028,7 @@ const envs: Record<string, Partial<StackInput>> = {
       videoAnalyzer: true, // 비디오 분석 숨기기
       diagram: true, // 다이어그램 생성 숨기기
       meetingMinutes: true, // 회의록 생성 숨기기
+      speechToSlides: true, // 음성 슬라이드 생성 숨기기
       voiceChat: true, // 음성 채팅 숨기기
     },
   },
@@ -1051,6 +1052,7 @@ const envs: Record<string, Partial<StackInput>> = {
       "videoAnalyzer": true,
       "diagram": true,
       "meetingMinutes": true,
+      "speechToSlides": true,
       "voiceChat": true
     }
   }

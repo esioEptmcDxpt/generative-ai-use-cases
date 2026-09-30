@@ -26,6 +26,7 @@ const baseStackInputSchema = z.object({
       videoAnalyzer: z.boolean().optional(),
       diagram: z.boolean().optional(),
       meetingMinutes: z.boolean().optional(),
+      speechToSlides: z.boolean().optional(),
       voiceChat: z.boolean().optional(),
       transcribe: z.boolean().optional(),
     })

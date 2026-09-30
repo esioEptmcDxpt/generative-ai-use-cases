@@ -21,6 +21,7 @@ import {
   PiMicrophoneBold,
   PiGraph,
   PiMagnifyingGlass,
+  PiPresentationChart,
 } from 'react-icons/pi';
 import AwsIcon from '../assets/aws.svg?react';
 import useInterUseCases from '../hooks/useInterUseCases';
@@ -208,6 +209,10 @@ const LandingPage: React.FC = () => {
 
   const demoMeetingMinutes = () => {
     navigate('/meeting-minutes');
+  };
+
+  const demoSpeechToSlides = () => {
+    navigate('/speech-to-slides');
   };
 
   const demoBlog = () => {
@@ -418,6 +423,14 @@ const LandingPage: React.FC = () => {
             onClickDemo={demoMeetingMinutes}
             icon={<PiNotebook />}
             description={t('landing.use_cases.meeting-minutes.description')}
+          />
+        )}
+        {enabled('speechToSlides') && (
+          <CardDemo
+            label={t('landing.use_cases.speech-to-slides.title')}
+            onClickDemo={demoSpeechToSlides}
+            icon={<PiPresentationChart />}
+            description={t('landing.use_cases.speech-to-slides.description')}
           />
         )}
         {enabled('writer') && (

@@ -1118,6 +1118,7 @@ const envs: Record<string, Partial<StackInput>> = {
       videoAnalyzer: true, // Hide video analysis
       diagram: true, // Hide diagram generation
       meetingMinutes: true, // Hide meeting minutes generation
+      speechToSlides: true, // Hide speech to slides
       voiceChat: true, // Hide voice chat
     },
   },
@@ -1141,6 +1142,7 @@ const envs: Record<string, Partial<StackInput>> = {
       "videoAnalyzer": true,
       "diagram": true,
       "meetingMinutes": true,
+      "speechToSlides": true,
       "voiceChat": true
     }
   }

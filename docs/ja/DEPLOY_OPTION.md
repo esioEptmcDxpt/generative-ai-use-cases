@@ -1137,6 +1137,7 @@ const envs: Record<string, Partial<StackInput>> = {
       videoAnalyzer: true, // 映像分析を非表示
       diagram: true, // ダイアグラム生成を非表示
       meetingMinutes: true, // 議事録生成を非表示
+      speechToSlides: true, // 音声からスライド作成を非表示
       voiceChat: true, // 音声チャットを非表示
     },
   },
@@ -1160,6 +1161,7 @@ const envs: Record<string, Partial<StackInput>> = {
       "videoAnalyzer": true,
       "diagram": true,
       "meetingMinutes": true,
+      "speechToSlides": true,
       "voiceChat": true
     }
   }

@@ -24,6 +24,7 @@ import {
   PiNotebook,
   PiGraph,
   PiMagnifyingGlass,
+  PiPresentationChart,
 } from 'react-icons/pi';
 import { Outlet } from 'react-router-dom';
 import Drawer, { ItemProps } from './components/Drawer';
@@ -210,6 +211,14 @@ const App: React.FC = () => {
           label: t('navigation.meetingMinutes'),
           to: '/meeting-minutes',
           icon: <PiNotebook />,
+          display: 'usecase' as const,
+        }
+      : null,
+    enabled('speechToSlides')
+      ? {
+          label: t('navigation.speechToSlides'),
+          to: '/speech-to-slides',
+          icon: <PiPresentationChart />,
           display: 'usecase' as const,
         }
       : null,
