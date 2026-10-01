@@ -119,8 +119,12 @@ agent_builder:
   tool_settings: Tool Settings
   updated: Updated date
 agent_core:
+  agent_list: Agent List
+  description_label: Description
   model: Model
+  no_agents: No agents available
   runtime: Runtime
+  search_agents: Search agents...
   start_conversation: Start a conversation with AgentCore
   title: AgentCore
 agent_dashboard: {}
@@ -128,6 +132,17 @@ auth:
   loading: Loading...
   login: Login
   title: Generative AI Use Cases on AWS
+chart:
+  data_limit_exceeded: Chart data exceeds the display limit. Please reduce the number of data points (max 10,000) or series (max 50).
+  download_png: Download PNG
+  geojson_load_failed: Failed to load map data
+  invalid_data: Invalid chart data
+  label: Chart
+  loading: Loading chart data...
+  map_source_attribution: 'Source: Ministry of Land, Infrastructure, Transport and Tourism - National Land Numerical Information'
+  view_chart: View Chart
+  view_code: View Code
+  zoom: Zoom chart
 chat:
   advanced_options: Advanced Options
   create_link: Create Link
@@ -143,7 +158,7 @@ chat:
   drop_files: Drop files here
   hint_cmd_enter: ⌘ + Enter to Submit
   hint_ctrl_enter: Ctrl + Enter to Submit
-  history: Conversation History
+  history: History
   initialize: Initialize
   open_link: Open Link
   prompt_examples: Prompt Examples
@@ -641,6 +656,8 @@ generateText:
   result_placeholder: Generated text will be displayed here
   source_info: Source information for text
   title: Text Generation
+image:
+  load_error: '[Image error: {{error}}]'
 inputs:
   attachment: Attachment
   reasoning: Extended thinking
@@ -801,6 +818,11 @@ landing:
       sub_kb: Knowledge Base
       sub_kendra: Amazon Kendra
       title: RAG Chat
+    speech-to-slides:
+      description: >-
+        Transcribes audio or video files (such as web meeting recordings) and creates HTML slides that summarize the content.
+        You can add a photo to the cover, and download the slides as a single HTML file.
+      title: Speech to Slides
     summarize:
       description: >-
         LLMs are good at summarizing large amounts of text. You can provide
@@ -969,6 +991,7 @@ navigation:
   sub: 🚅ESIO ver.
   settings: Settings
   speechRecognition: Speech Recognition
+  speechToSlides: Speech to Slides
   summary: Summary
   textGeneration: Text Generation
   translation: Translation
@@ -1107,6 +1130,36 @@ sketch:
   clear: Clear
   pen_size: Pen Size
   upload_image: Upload Image
+speechToSlides:
+  additional_info: Supplementary Information
+  additional_info_placeholder: 'e.g. Speaker: Mr. Smith, Date: September 29, 2026, Place: Engineering Department (used for the cover and for correcting names)'
+  additional_instruction: Additional Instructions
+  additional_instruction_placeholder: e.g. Summarize into about 5 slides / Shorten the heading of page 2
+  content_type: Content Type
+  content_type_meeting: Meeting (web meeting recordings, etc.)
+  content_type_speech: Speech / Greeting / Address
+  cover_photo: Cover Photo
+  cover_photo_help: If no photo is selected, the cover is created without a photo. The photo is not sent to the AI; it is resized in the browser and embedded in the HTML.
+  download: Download HTML
+  error_generate: Failed to generate the slides. Please try again later or select another model.
+  error_no_slides: Could not generate slides. Please select another model and try again.
+  generate: Create Slides
+  generating: Generating... ({{count}} characters)
+  model: Model
+  need_transcript: Please run speech recognition first
+  optional: Optional
+  pages: '{{count}} pages'
+  photo_error: Could not load the image. Please select another image.
+  preview: Slide Preview
+  preview_help: Scroll inside the preview to switch pages. Open the downloaded HTML in a browser to view it in full screen.
+  regenerate: Recreate
+  remove_photo: Remove photo
+  result_placeholder: The created slides will be displayed here
+  step_result: 3. Result
+  step_settings: 2. Slide Settings
+  step_transcribe: 1. Transcribe Audio / Video File
+  step_transcribe_description: In addition to audio files such as mp3 and m4a, video files (mp4) such as web meeting recordings can be used (up to 2 GB).
+  title: Speech to Slides
 stat:
   cache_read_tokens: Cache Read Tokens
   cache_write_tokens: Cache Write Tokens
@@ -1141,6 +1194,7 @@ transcribe:
     Please enter the source text for meeting minutes directly in the
     "Transcript" area below.
   direct_input_placeholder: Please enter the source text for meeting minutes here...
+  file_too_large: The file exceeds the size limit (2 GB). Please reduce the size, for example by converting it to an audio-only file.
   file_upload: File Upload
   max_speakers: Max Speakers
   max_speakers_help: Maximum number of speakers to recognize

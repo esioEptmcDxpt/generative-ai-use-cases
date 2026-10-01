@@ -32,6 +32,7 @@ export interface WebProps {
   readonly predictStreamFunctionArn: string;
   readonly ragEnabled: boolean;
   readonly ragKnowledgeBaseEnabled: boolean;
+  readonly ragKnowledgeBaseStorageType: string;
   readonly agentEnabled: boolean;
   readonly flows?: Flow[];
   readonly flowStreamFunctionArn: string;
@@ -99,7 +100,7 @@ export class Web extends Construct {
       const cspSaml = props.samlCognitoDomainName
         ? ` https://${props.samlCognitoDomainName}`
         : '';
-      const csp = `default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; media-src 'self' blob: https://*.amazonaws.com; connect-src 'self' https://*.amazonaws.com https://*.amazoncognito.com wss://*.amazonaws.com:* https://*.on.aws https://raw.githubusercontent.com https://api.github.com${cspSaml}; font-src 'self' https://fonts.gstatic.com data:; object-src 'none'; frame-ancestors 'none'; frame-src 'self' https://www.youtube.com/;`;
+      const csp = `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; media-src 'self' blob: https://*.amazonaws.com; connect-src 'self' https://*.amazonaws.com https://*.amazoncognito.com wss://*.amazonaws.com:* https://*.on.aws https://raw.githubusercontent.com https://api.github.com${cspSaml}; font-src 'self' https://fonts.gstatic.com data:; object-src 'none'; frame-ancestors 'none'; frame-src 'self' https://www.youtube.com/;`;
 
       // Create Response Headers Policy for security headers
       const responseHeadersPolicy = new ResponseHeadersPolicy(
@@ -227,10 +228,12 @@ export class Web extends Construct {
     }
 
     const build = new NodejsBuild(this, 'BuildWeb', {
+      nodejsVersion: 22,
       assets: [
         {
           path: '../../',
           exclude: [
+            '.cache',
             '.git',
             '.github',
             '.gitignore',
@@ -241,8 +244,8 @@ export class Web extends Construct {
             'docs',
             'imgs',
             'setup-env.sh',
+            'site',
             'node_modules',
-            'prompt-templates',
             'packages/cdk/**/*',
             '!packages/cdk/cdk.json',
             'packages/web/dist',
@@ -257,7 +260,7 @@ export class Web extends Construct {
       outputSourceDirectory: './packages/web/dist',
       buildCommands: ['npm ci', 'npm run web:build'],
       buildEnvironment: {
-        NODE_OPTIONS: '--max-old-space-size=4096',
+        NODE_OPTIONS: '--max-old-space-size=15000', // Memory for CodeBuild at deployment
         VITE_APP_API_ENDPOINT: props.apiEndpointUrl,
         VITE_APP_REGION: Stack.of(this).region,
         VITE_APP_USER_POOL_ID: props.userPoolId,
@@ -267,6 +270,8 @@ export class Web extends Construct {
         VITE_APP_RAG_ENABLED: props.ragEnabled.toString(),
         VITE_APP_RAG_KNOWLEDGE_BASE_ENABLED:
           props.ragKnowledgeBaseEnabled.toString(),
+        VITE_APP_RAG_KNOWLEDGE_BASE_STORAGE_TYPE:
+          props.ragKnowledgeBaseStorageType,
         VITE_APP_AGENT_ENABLED: props.agentEnabled.toString(),
         VITE_APP_FLOWS: JSON.stringify(props.flows || []),
         VITE_APP_FLOW_STREAM_FUNCTION_ARN: props.flowStreamFunctionArn,
@@ -319,6 +324,6 @@ export class Web extends Construct {
     // Enhance computing resources
     (
       build.node.findChild('Project').node.defaultChild as CfnResource
-    ).addPropertyOverride('Environment.ComputeType', ComputeType.MEDIUM);
+    ).addPropertyOverride('Environment.ComputeType', ComputeType.LARGE);
   }
 }

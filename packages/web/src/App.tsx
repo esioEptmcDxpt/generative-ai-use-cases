@@ -24,6 +24,7 @@ import {
   PiNotebook,
   PiGraph,
   PiMagnifyingGlass,
+  PiPresentationChart,
 } from 'react-icons/pi';
 import { Outlet } from 'react-router-dom';
 import Drawer, { ItemProps } from './components/Drawer';
@@ -213,6 +214,14 @@ const App: React.FC = () => {
           display: 'usecase' as const,
         }
       : null,
+    enabled('speechToSlides')
+      ? {
+          label: t('navigation.speechToSlides'),
+          to: '/speech-to-slides',
+          icon: <PiPresentationChart />,
+          display: 'usecase' as const,
+        }
+      : null,
     enabled('writer')
       ? {
           label: t('navigation.writing'),
@@ -269,12 +278,14 @@ const App: React.FC = () => {
           display: 'usecase' as const,
         }
       : null,
-    {
-      label: t('navigation.speechRecognition'),
-      to: '/transcribe',
-      icon: <PiSpeakerHighBold />,
-      display: 'tool' as const,
-    },
+    enabled('transcribe')
+      ? {
+          label: t('navigation.speechRecognition'),
+          to: '/transcribe',
+          icon: <PiSpeakerHighBold />,
+          display: 'tool' as const,
+        }
+      : null,
     optimizePromptEnabled
       ? {
           label: t('navigation.promptOptimization'),

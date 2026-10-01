@@ -110,8 +110,12 @@ agent_builder:
   tool_settings: ツール設定
   updated: 更新日
 agent_core:
+  agent_list: エージェント一覧
+  description_label: 説明
   model: モデル
+  no_agents: 利用可能なエージェントがありません
   runtime: ランタイム
+  search_agents: エージェントを検索...
   start_conversation: AgentCore と会話を始める
   title: AgentCore
 agent_dashboard: {}
@@ -119,6 +123,17 @@ auth:
   loading: 読み込み中...
   login: ログイン
   title: Generative AI Use Cases on AWS
+chart:
+  data_limit_exceeded: チャートデータが表示上限を超えています。データポイント数（上限10,000）またはシリーズ数（上限50）を削減してください。
+  download_png: PNGをダウンロード
+  geojson_load_failed: マップデータの読み込みに失敗しました
+  invalid_data: 無効なチャートデータ
+  label: チャート
+  loading: チャートデータを読み込み中...
+  map_source_attribution: '出典: 国土交通省 国土数値情報'
+  view_chart: チャートを表示
+  view_code: コードを表示
+  zoom: チャートを拡大
 chat:
   advanced_options: 高度なオプション
   create_link: リンクの作成
@@ -132,7 +147,7 @@ chat:
   drop_files: ファイルをドロップしてください
   hint_cmd_enter: ⌘ + Enter で送信
   hint_ctrl_enter: Ctrl + Enter で送信
-  history: 会話履歴
+  history: 履歴
   initialize: 初期化
   open_link: リンクを開く
   prompt_examples: プロンプト例
@@ -570,6 +585,8 @@ generateText:
   result_placeholder: 生成された文章がここに表示されます
   source_info: 文章の元になる情報
   title: 文章生成
+image:
+  load_error: '[画像エラー: {{error}}]'
 inputs:
   attachment: 添付ファイル
   reasoning: 深く考える
@@ -689,6 +706,11 @@ landing:
       sub_kb: Knowledge Base
       sub_kendra: Amazon Kendra
       title: RAG チャット
+    speech-to-slides:
+      description: >-
+        音声・動画ファイル（Web 会議の録画など）を文字起こしし、内容を要約した HTML スライドを作成します。
+        表紙に写真を入れることもでき、作成したスライドは 1 つの HTML ファイルとしてダウンロードできます。
+      title: 音声からスライド作成
     summarize:
       description: >-
         LLM
@@ -843,6 +865,7 @@ navigation:
   sub: 🚅電気SIO ver.
   settings: 設定
   speechRecognition: 音声認識
+  speechToSlides: 音声からスライド作成
   summary: 要約
   textGeneration: 文章生成
   translation: 翻訳
@@ -958,6 +981,36 @@ sketch:
   clear: クリア
   pen_size: ペンサイズ
   upload_image: 画像をアップロード
+speechToSlides:
+  additional_info: 補足情報
+  additional_info_placeholder: 例）話者：〇〇相談役、日付：2026年9月29日、場所：〇〇事業本部 設備部（表紙や人名・組織名の補正に使います）
+  additional_instruction: 追加の指示
+  additional_instruction_placeholder: 例）スライドを 5 枚程度にまとめてください / 2 ページ目の見出しを短くしてください
+  content_type: 内容の種類
+  content_type_meeting: 会議（Web 会議の録画など）
+  content_type_speech: 訓話・挨拶・スピーチ
+  cover_photo: 表紙の写真
+  cover_photo_help: 写真を選択しない場合は、写真なしの表紙で作成します。写真は AI には送信せず、ブラウザ内で縮小して HTML に埋め込みます。
+  download: HTML をダウンロード
+  error_generate: スライドの生成に失敗しました。時間をおいて再度実行するか、別のモデルを選択してください。
+  error_no_slides: スライドを生成できませんでした。別のモデルを選択して再度実行してください。
+  generate: スライドを作成
+  generating: 作成中...（{{count}} 文字）
+  model: モデル
+  need_transcript: 先に音声認識を実行してください
+  optional: 任意
+  pages: '{{count}} ページ'
+  photo_error: 画像を読み込めませんでした。別の画像を選択してください。
+  preview: スライドのプレビュー
+  preview_help: プレビュー内をスクロールするとページが切り替わります。ダウンロードした HTML はブラウザで開いて全画面で表示できます。
+  regenerate: 再作成
+  remove_photo: 写真を削除
+  result_placeholder: 作成したスライドがここに表示されます
+  step_result: 3. 作成結果
+  step_settings: 2. スライドの設定
+  step_transcribe: 1. 音声・動画ファイルの文字起こし
+  step_transcribe_description: mp3・m4a などの音声ファイルに加え、Web 会議の録画などの動画ファイル（mp4）も利用できます（最大 2GB）。
+  title: 音声からスライド作成
 stat:
   cache_read_tokens: キャッシュ読込
   cache_write_tokens: キャッシュ書込
@@ -990,6 +1043,7 @@ transcribe:
   direct_input: 直接入力
   direct_input_instruction: 下の「文字起こし」エリアに議事録の元となるテキストを直接入力してください。
   direct_input_placeholder: ここに議事録の元となるテキストを入力してください...
+  file_too_large: ファイルサイズが上限（2GB）を超えています。音声のみのファイルに変換するなどしてサイズを小さくしてください。
   file_upload: ファイルアップロード
   max_speakers: Max Speakers
   max_speakers_help: 認識する話者の最大数

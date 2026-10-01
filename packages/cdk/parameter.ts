@@ -143,25 +143,35 @@ const envs: Record<string, Partial<StackInput>> = {
     //cloudfront: {
     //distributionId: 'E1KFW6C4JGJUB6',
     // domainName: 'd2pye9lkf1lyw0.cloudfront.net',
-    modelRegion: 'us-west-2',
+    //modelRegion: 'us-west-2',
+    modelRegion: 'ap-northeast-1',
     modelIds: [
-      'global.anthropic.claude-sonnet-4-6',
-      'global.anthropic.claude-sonnet-4-5-20250929-v1:0',
+      //'global.anthropic.claude-sonnet-5-5',
+      'global.anthropic.claude-sonnet-5',
+      //'global.anthropic.claude-sonnet-4-6',
+      //'global.anthropic.claude-sonnet-4-5-20250929-v1:0',
       'global.anthropic.claude-haiku-4-5-20251001-v1:0',
-      'global.anthropic.claude-sonnet-4-20250514-v1:0',
+      //'global.anthropic.claude-sonnet-4-20250514-v1:0',
       //'us.amazon.nova-premier-v1:0',
-      'us.amazon.nova-pro-v1:0',
-      'us.amazon.nova-lite-v1:0',
-      'us.amazon.nova-micro-v1:0',
-      'us.meta.llama3-3-70b-instruct-v1:0',
-      'us.meta.llama4-maverick-17b-instruct-v1:0',
-      'us.meta.llama4-scout-17b-instruct-v1:0',
-      'cohere.command-r-plus-v1:0',
-      'cohere.command-r-v1:0',
-      'us.mistral.pixtral-large-2502-v1:0',
+      //'us.amazon.nova-pro-v1:0',
+      //'us.amazon.nova-lite-v1:0',
+      //'us.amazon.nova-micro-v1:0',
+      //'us.meta.llama3-3-70b-instruct-v1:0',
+      //'us.meta.llama4-maverick-17b-instruct-v1:0',
+      //'us.meta.llama4-scout-17b-instruct-v1:0',
+      //'cohere.command-r-plus-v1:0',
+      //'cohere.command-r-v1:0',
+      //'us.mistral.pixtral-large-2502-v1:0',
       //'mistral.mistral-large-2407-v1:0',
-      'mistral.mistral-large-3-675b-instruct',
-      'openai.gpt-oss-120b-1:0',
+      //'mistral.mistral-large-3-675b-instruct',
+      //'openai.gpt-oss-120b-1:0',
+      //'global.openai.gpt-6-luna',
+      //'global.openai.gpt-6-terra',
+      //'global.openai.gpt-6-sol',
+      //'global.openai.gpt-6-astra',
+      //'global.xai.grok-4.7',
+      //'global.anthropic.claude-opus-5-5',
+      'global.anthropic.claude-opus-5'
       ],
     imageGenerationModelIds: [
       'stability.stable-image-ultra-v1:1',
@@ -187,12 +197,12 @@ const envs: Record<string, Partial<StackInput>> = {
         region: 'ap-northeast-1',
       },
     ],
-    ragEnabled: true,
-    kendraIndexArn:
-      'arn:aws:kendra:ap-northeast-1:326497581172:index/3ce313b7-4bfb-4257-8127-11db308dfdbe',
-    kendraDataSourceBucketName: 'jre-regulations',
-    kendraIndexLanguage: 'ja',
-    ragKnowledgeBaseEnabled: false,
+    ragEnabled: false,
+    //kendraIndexArn:
+    //  'arn:aws:kendra:ap-northeast-1:326497581172:index/3ce313b7-4bfb-4257-8127-11db308dfdbe',
+    //kendraDataSourceBucketName: 'jre-regulations',
+    //kendraIndexLanguage: 'ja',
+    //ragKnowledgeBaseEnabled: false,
     //ragKnowledgeBaseId: 'PQSVG6HETU',
     //ragKnowledgeBaseStandbyReplicas: false,
     //ragKnowledgeBaseAdvancedParsing: false,
@@ -204,51 +214,51 @@ const envs: Record<string, Partial<StackInput>> = {
     // Parameters for development environment
     // エージェント設定を追加
     inlineAgents: true,
-    agentEnabled: true,
+    agentEnabled: false,
     agents: [
       {
         // Agent-Name  GenU-Code-Interpreter
         displayName: 'データ分析屋さん',
-        agentId: 'TWU9YT34HX',
+        agentId: '0LUIENBUGB',
         //aliasId: 'MULPCVZTCS',
-        aliasId: 'PKPA2E3CU3',
+        aliasId: 'V77DVXIPP8',
         description:'Test',
       },
-      {
+      //{
         // Agent-Name  SKAI-PoC-S3
-        displayName: '安全エージェント',
+        //displayName: '安全エージェント',
         //agentId: '9JNBPBZAXJ',
         //aliasId: 'WNGLTT9I4L',
-        agentId: 'NTXEI7ZSO8',
-        aliasId: 'MGFGYGSJLI',
-        description:'Test',
-      },
-      {
+        //agentId: 'NTXEI7ZSO8',
+        //aliasId: 'MGFGYGSJLI',
+        //description:'Test',
+      //},
+      //{
         // Agent-Name  electrical-safety-knowledge-base-oregon-S3
-        displayName: '電力事故記事エージェント',
+        //displayName: '電力事故記事エージェント',
         //agentId: 'L8T3RJSWOU',
         //aliasId: 'HF5RVNOSWJ',
-        agentId: 'EBX6OF1U1W',
-        aliasId: 'FIPXQ48M3Z',
-        description:'Test',
-      },
-      {
+        //agentId: 'EBX6OF1U1W',
+        //aliasId: 'FIPXQ48M3Z',
+        //description:'Test',
+      //},
+      //{
         // Agent-Name  SIO_TRRAG-S3
-        displayName: '電力審査エージェント',
+        //displayName: '電力審査エージェント',
         //agentId: 'XRTHRHNZ2M',
         //aliasId: '3KYC8URE9G',
-        agentId: 'LVKYAB7ZL7',
-        aliasId: 'OITUMHKLRG',
-        description:'Test',
-      },
-      {
+        //agentId: 'LVKYAB7ZL7',
+        //aliasId: 'OITUMHKLRG',
+        //description:'Test',
+      //},
+      //{
         // Agent-Name  SIO_power_distribution
-        displayName: '配電エージェント',
-        agentId: '48ZHU6N3VY',
+        //displayName: '配電エージェント',
+        //agentId: '48ZHU6N3VY',
         //aliasId: 'S3P2GGSK9U',
-        aliasId: '45RHZKMHVT',
-        description:'Test',
-      },
+        //aliasId: '45RHZKMHVT',
+        //description:'Test',
+      //},
     ],    
   },
   staging: {
@@ -305,6 +315,12 @@ export const getParams = (app: cdk.App): ProcessedStackInput => {
     ),
     // Process agentCoreRegion: null -> modelRegion
     agentCoreRegion: params.agentCoreRegion || params.modelRegion,
+    // Compute isAgentCoreNetworkPrivate from VPC configuration
+    isAgentCoreNetworkPrivate: !!(
+      params.agentCoreVpcId &&
+      params.agentCoreSubnetIds &&
+      params.agentCoreSubnetIds.length > 0
+    ),
     // Load branding configuration
     brandingConfig: loadBrandingConfig(),
   };
