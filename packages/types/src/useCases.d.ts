@@ -9,7 +9,9 @@ export type HiddenUseCases = {
   videoAnalyzer?: boolean;
   diagram?: boolean;
   meetingMinutes?: boolean;
+  speechToSlides?: boolean;
   voiceChat?: boolean;
+  transcribe?: boolean;
 };
 
 export type HiddenUseCasesKeys = keyof HiddenUseCases;

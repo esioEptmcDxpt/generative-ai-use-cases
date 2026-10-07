@@ -32,6 +32,7 @@ export VITE_APP_FLOW_STREAM_FUNCTION_ARN=$(extract_value "$stack_output" 'Invoke
 export VITE_APP_FLOWS=$(extract_value "$stack_output" 'Flows' | base64 -d)
 export VITE_APP_RAG_ENABLED=$(extract_value "$stack_output" RagEnabled)
 export VITE_APP_RAG_KNOWLEDGE_BASE_ENABLED=$(extract_value "$stack_output" RagKnowledgeBaseEnabled)
+export VITE_APP_RAG_KNOWLEDGE_BASE_STORAGE_TYPE=$(extract_value "$stack_output" RagKnowledgeBaseStorageType)
 export VITE_APP_AGENT_ENABLED=$(extract_value "$stack_output" AgentEnabled)
 export VITE_APP_SELF_SIGN_UP_ENABLED=$(extract_value "$stack_output" SelfSignUpEnabled)
 export VITE_APP_MODEL_REGION=$(extract_value "$stack_output" ModelRegion)
@@ -65,3 +66,30 @@ else
     export VITE_APP_BRANDING_LOGO_PATH=""
     export VITE_APP_BRANDING_TITLE=""
 fi
+
+# Backend environment variables
+export MODEL_REGION=$(extract_value "$stack_output" ModelRegion)
+export MODEL_IDS=$(extract_value "$stack_output" ModelIds)
+export IMAGE_GENERATION_MODEL_IDS=$(extract_value "$stack_output" ImageGenerateModelIds)
+export VIDEO_GENERATION_MODEL_IDS=$(extract_value "$stack_output" VideoGenerateModelIds)
+export SPEECH_TO_SPEECH_MODEL_IDS=$(extract_value "$stack_output" SpeechToSpeechModelIds)
+export TABLE_NAME=$(extract_value "$stack_output" TableName)
+export STATS_TABLE_NAME=$(extract_value "$stack_output" StatsTableName)
+export BUCKET_NAME=$(extract_value "$stack_output" BucketName)
+export USER_POOL_ID=$(extract_value "$stack_output" UserPoolId)
+export USER_POOL_CLIENT_ID=$(extract_value "$stack_output" UserPoolClientId)
+export KNOWLEDGE_BASE_ID=$(extract_value "$stack_output" KnowledgeBaseId || echo "")
+export INDEX_ID=$(extract_value "$stack_output" IndexId || echo "")
+export USECASE_TABLE_NAME=$(extract_value "$stack_output" UseCaseTableName || echo "")
+export USECASE_ID_INDEX_NAME=$(extract_value "$stack_output" UseCaseIdIndexName || echo "")
+export AUDIO_BUCKET_NAME=$(extract_value "$stack_output" AudioBucketName || echo "")
+export TRANSCRIPT_BUCKET_NAME=$(extract_value "$stack_output" TranscriptBucketName || echo "")
+export BUILTIN_AGENTS_JSON=$(extract_value "$stack_output" Agents | base64 --decode || echo "[]")
+export CUSTOM_AGENTS_JSON="[]"
+export CROSS_ACCOUNT_BEDROCK_ROLE_ARN=""
+export VIDEO_BUCKET_REGION_MAP="{}"
+export QUERY_DECOMPOSITION_ENABLED=$(extract_value "$stack_output" QueryDecompositionEnabled || echo "false")
+export RERANKING_MODEL_ID=$(extract_value "$stack_output" RerankingModelId || echo "")
+export LANGUAGE="ja"
+export SPEECH_TO_SPEECH_TASK_FUNCTION_ARN=""
+export USER_POOL_PROXY_ENDPOINT=""

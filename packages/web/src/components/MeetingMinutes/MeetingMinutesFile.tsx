@@ -16,6 +16,9 @@ import ExpandableField from '../ExpandableField';
 import Textarea from '../Textarea';
 import useTranscribe from '../../hooks/useTranscribe';
 
+// Maximum media file size accepted by Amazon Transcribe (2 GB)
+const MAX_MEDIA_FILE_SIZE = 2 * 1024 * 1024 * 1024;
+
 interface MeetingMinutesFileProps {
   /** Callback when transcript text changes */
   onTranscriptChange?: (text: string) => void;
@@ -37,6 +40,7 @@ const MeetingMinutesFile: React.FC<MeetingMinutesFileProps> = ({
   const [speakerLabel, setSpeakerLabel] = useState(false);
   const [maxSpeakers, setMaxSpeakers] = useState(4);
   const [speakers, setSpeakers] = useState('');
+  const [fileError, setFileError] = useState('');
 
   // Language options
   const languageOptions = useMemo(
@@ -94,7 +98,13 @@ const MeetingMinutesFile: React.FC<MeetingMinutesFileProps> = ({
   // Handle file change
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
+    setFileError('');
     if (files && files[0]) {
+      if (files[0].size > MAX_MEDIA_FILE_SIZE) {
+        setFileError(t('transcribe.file_too_large'));
+        e.target.value = '';
+        return;
+      }
       setFile(files[0]);
     }
   };
@@ -141,6 +151,7 @@ const MeetingMinutesFile: React.FC<MeetingMinutesFileProps> = ({
   // Clear function
   const onClickClear = useCallback(() => {
     setFileTranscriptText('');
+    setFileError('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -166,6 +177,9 @@ const MeetingMinutesFile: React.FC<MeetingMinutesFileProps> = ({
           <p className="ml-0.5 mt-1 text-xs text-gray-500" id="file_input_help">
             {t('transcribe.supported_files')}
           </p>
+          {fileError && (
+            <p className="ml-0.5 mt-1 text-sm text-red-500">{fileError}</p>
+          )}
         </div>
       </div>
 

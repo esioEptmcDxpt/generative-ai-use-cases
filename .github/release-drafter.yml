@@ -19,8 +19,12 @@ version-resolver:
     labels:
       - 'patch'
   default: patch
+exclude-contributors:
+  - 'dependabot'
+  - 'dependabot[bot]'
 exclude-labels:
   - 'new release'
+  - 'dependencies'
 template: |
   ## Changes
 

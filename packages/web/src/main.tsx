@@ -27,11 +27,13 @@ import GenerateVideoPage from './pages/GenerateVideoPage';
 import OptimizePromptPage from './pages/OptimizePromptPage';
 import TranscribePage from './pages/TranscribePage';
 import MeetingMinutesPage from './pages/MeetingMinutesPage';
+import SpeechToSlidesPage from './pages/SpeechToSlidesPage';
 import AgentChatPage from './pages/AgentChatPage';
 import FlowChatPage from './pages/FlowChatPage';
 import VoiceChatPage from './pages/VoiceChatPage';
 import McpChatPage from './pages/McpChatPage';
 import AgentCorePage from './pages/AgentCorePage.tsx';
+import AgentCoreListPage from './pages/AgentCoreListPage.tsx';
 import ResearchAgentPage from './pages/ResearchAgentPage.tsx';
 import AgentBuilderListPage from './pages/agentBuilder/AgentBuilderListPage.tsx';
 import AgentBuilderEditPage from './pages/agentBuilder/AgentBuilderEditPage';
@@ -116,6 +118,12 @@ const routes: RouteObject[] = [
     ? {
         path: '/meeting-minutes',
         element: <MeetingMinutesPage />,
+      }
+    : null,
+  enabled('speechToSlides')
+    ? {
+        path: '/speech-to-slides',
+        element: <SpeechToSlidesPage />,
       }
     : null,
   enabled('writer')
@@ -213,7 +221,7 @@ const routes: RouteObject[] = [
   agentCoreEnabled
     ? {
         path: '/agent-core',
-        element: <AgentCorePage />,
+        element: <AgentCoreListPage />,
       }
     : null,
   agentCoreEnabled
