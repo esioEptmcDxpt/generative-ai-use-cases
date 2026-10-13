@@ -20,8 +20,9 @@ const envs: Record<string, Partial<StackInput>> = {
   '': {
     modelRegion: 'ap-northeast-1',
     modelIds: [
-      'jp.anthropic.claude-sonnet-4-5-20250929-v1:0',
-      'jp.anthropic.claude-haiku-4-5-20251001-v1:0',
+      'global.anthropic.claude-sonnet-5-5',
+      'global.anthropic.claude-haiku-5-5',
+      'global.anthropic.claude-opus-5-5',
       'jp.amazon.nova-2-lite-v1:0',
       'openai.gpt-oss-120b-1:0',
       {
@@ -34,17 +35,15 @@ const envs: Record<string, Partial<StackInput>> = {
       },
     ],
     imageGenerationModelIds: [
-      'amazon.nova-canvas-v1:0',
       { modelId: 'stability.sd3-5-large-v1:0', region: 'us-west-2' },
       { modelId: 'stability.stable-image-core-v1:1', region: 'us-west-2' },
       { modelId: 'stability.stable-image-ultra-v1:1', region: 'us-west-2' },
     ],
     videoGenerationModelIds: [
-      'amazon.nova-reel-v1:0',
       { modelId: 'luma.ray-v2:0', region: 'us-west-2' },
     ],
     speechToSpeechModelIds: [
-      { modelId: 'amazon.nova-sonic-v1:0', region: 'us-east-1' },
+      { modelId: 'amazon.nova-2-sonic-v1:0', region: 'ap-northeast-1' },
     ],
     allowedSignUpEmailDomains: ['jreast.co.jp'],
   },
