@@ -6,6 +6,12 @@ export type FeatureFlags = {
   image?: boolean;
   video?: boolean;
   reasoning?: boolean;
+  adaptiveThinking?: boolean;
+  // Adaptive thinking is always on and cannot be disabled (e.g. Claude Sonnet 5)
+  adaptiveThinkingAlwaysOn?: boolean;
+  // Supports the 'xhigh' effort level (e.g. Claude Opus 4.7+, Claude Sonnet 5)
+  xhighEffort?: boolean;
+  noSamplingParams?: boolean;
 
   image_gen?: boolean;
   video_gen?: boolean;
@@ -23,7 +29,6 @@ export type FeatureFlags = {
 export type ModelConfiguration = {
   modelId: string;
   region: string;
-  inferenceProfileArn?: string;
 };
 
 export type ModelMetadata = {

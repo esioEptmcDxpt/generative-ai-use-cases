@@ -24,7 +24,6 @@ import {
   BEDROCK_TEXT_GEN_MODELS,
   BEDROCK_IMAGE_GEN_MODELS,
   BEDROCK_VIDEO_GEN_MODELS,
-  getInferenceProfileArn,
 } from './models';
 import { streamingChunk } from './streamingChunk';
 import { initBedrockRuntimeClient } from './bedrockClient';
@@ -152,27 +151,27 @@ const bedrockApi: Omit<ApiInterface, 'invokeFlow'> = {
         }
       }
     } catch (e) {
+      console.error(e);
       if (
         e instanceof ThrottlingException ||
         e instanceof ServiceQuotaExceededException
       ) {
         yield streamingChunk({
-          text: 'The server is currently experiencing high access. Please try again later.',
+          text: '',
           stopReason: 'error',
+          errorCode: 'THROTTLING',
         });
       } else if (e instanceof AccessDeniedException) {
-        const modelAccessURL = `https://${region}.console.aws.amazon.com/bedrock/home?region=${region}#/modelaccess`;
         yield streamingChunk({
-          text: `The selected model is not enabled. Please enable the model in the [Bedrock console Model Access screen](${modelAccessURL}).`,
+          text: '',
           stopReason: 'error',
+          errorCode: 'ACCESS_DENIED',
         });
       } else {
-        console.error(e);
         yield streamingChunk({
-          text:
-            'An error occurred. Please report the following error to the administrator.\n' +
-            e,
+          text: '',
           stopReason: 'error',
+          errorCode: 'UNKNOWN_ERROR',
         });
       }
     }
@@ -182,9 +181,8 @@ const bedrockApi: Omit<ApiInterface, 'invokeFlow'> = {
     const client = await initBedrockRuntimeClient({ region });
 
     // Image generation using Stable Diffusion or Titan Image Generator is not supported for the Converse API, so InvokeModelCommand is used.
-    const modelIdOrArn = getInferenceProfileArn(model.modelId) || model.modelId;
     const command = new InvokeModelCommand({
-      modelId: modelIdOrArn,
+      modelId: model.modelId,
       body: createBodyImage(model, params),
       contentType: 'application/json',
     });
@@ -205,9 +203,8 @@ const bedrockApi: Omit<ApiInterface, 'invokeFlow'> = {
       throw new Error('Video tmp buket is not defined');
     }
 
-    const modelIdOrArn = getInferenceProfileArn(model.modelId) || model.modelId;
     const command = new StartAsyncInvokeCommand({
-      modelId: modelIdOrArn,
+      modelId: model.modelId,
       modelInput: createBodyVideo(model, params),
       outputDataConfig: {
         s3OutputDataConfig: {

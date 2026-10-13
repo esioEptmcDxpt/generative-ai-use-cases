@@ -1,4 +1,4 @@
-import { Stack, StackProps, CfnOutput } from 'aws-cdk-lib';
+import { Stack, StackProps, CfnOutput, Duration } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import {
   Auth,
@@ -6,21 +6,18 @@ import {
   Web,
   Database,
   Rag,
-  RagKnowledgeBase,
   Transcribe,
   CommonWebAcl,
   SpeechToSpeech,
   McpApi,
   AgentCore,
+  UseCaseBuilder,
 } from './construct';
 import { loadMCPConfig, extractSafeMCPConfig } from './utils/mcp-config-loader';
 import { CfnWebACLAssociation } from 'aws-cdk-lib/aws-wafv2';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import { ICertificate } from 'aws-cdk-lib/aws-certificatemanager';
-import { UseCaseBuilder } from './construct/use-case-builder';
-import { AgentBuilder } from './construct/agent-builder';
 import { ProcessedStackInput } from './stack-input';
-import { allowS3AccessWithSourceIpCondition } from './utils/s3-access-policy';
 import {
   InterfaceVpcEndpoint,
   IVpc,
@@ -29,6 +26,8 @@ import {
 } from 'aws-cdk-lib/aws-ec2';
 import { Bucket } from 'aws-cdk-lib/aws-s3';
 import { AgentCoreStack } from './agent-core-stack';
+import { ResearchAgentCoreStack } from './research-agent-core-stack';
+import { ClosedNetworkStack } from './closed-network-stack';
 import * as path from 'path';
 import { RemoteOutputs } from 'cdk-remote-stack';
 import { REMOTE_OUTPUT_KEYS } from './remote-output-keys';
@@ -44,6 +43,9 @@ export interface GenerativeAiUseCasesStackProps extends StackProps {
   readonly createGenericAgentCoreRuntime?: boolean;
   readonly agentBuilderEnabled?: boolean;
   readonly agentCoreStack?: AgentCoreStack;
+  // Research Agent Core
+  readonly researchAgentEnabled?: boolean;
+  readonly researchAgentCoreStack?: ResearchAgentCoreStack;
   // Video Generation
   readonly videoBucketRegionMap: Record<string, string>;
   // Guardrail
@@ -59,8 +61,10 @@ export interface GenerativeAiUseCasesStackProps extends StackProps {
   readonly vpc?: IVpc;
   readonly apiGatewayVpcEndpoint?: InterfaceVpcEndpoint;
   readonly webBucket?: Bucket;
-  readonly cognitoUserPoolProxyEndpoint?: string;
-  readonly cognitoIdentityPoolProxyEndpoint?: string;
+  // ALB origin / web URL are read from this stack via cdk-remote-stack
+  // RemoteOutputs (no Fn::ImportValue, so no export-in-use deadlock when the
+  // custom domain is toggled).
+  readonly closedNetworkStack?: ClosedNetworkStack;
 }
 
 export class GenerativeAiUseCasesStack extends Stack {
@@ -85,6 +89,7 @@ export class GenerativeAiUseCasesStack extends Stack {
       const agentRemoteOutputs = new RemoteOutputs(this, 'AgentRemoteOutputs', {
         stack: props.agentStack,
         alwaysUpdate: true,
+        timeout: Duration.seconds(600),
       });
       agentsJson = agentRemoteOutputs.get(REMOTE_OUTPUT_KEYS.AGENTS);
     }
@@ -93,11 +98,14 @@ export class GenerativeAiUseCasesStack extends Stack {
     let genericRuntimeName: string | undefined;
     let agentBuilderRuntimeArn: string | undefined;
     let agentBuilderRuntimeName: string | undefined;
+    let researchRuntimeArn: string | undefined;
+    let researchRuntimeName: string | undefined;
 
     // Get runtime info from remote AgentCore stack using cdk-remote-stack
     if (params.createGenericAgentCoreRuntime || params.agentBuilderEnabled) {
       const remoteOutputs = new RemoteOutputs(this, 'AgentCoreRemoteOutputs', {
         stack: props.agentCoreStack!,
+        timeout: Duration.seconds(600),
       });
 
       if (params.createGenericAgentCoreRuntime) {
@@ -113,6 +121,25 @@ export class GenerativeAiUseCasesStack extends Stack {
           'AgentBuilderAgentCoreRuntimeName'
         );
       }
+    }
+
+    // Get runtime info from remote Research AgentCore stack
+    if (params.researchAgentEnabled) {
+      const researchRemoteOutputs = new RemoteOutputs(
+        this,
+        'ResearchAgentCoreRemoteOutputs',
+        {
+          stack: props.researchAgentCoreStack!,
+          timeout: Duration.seconds(600),
+        }
+      );
+
+      researchRuntimeArn = researchRemoteOutputs.get(
+        REMOTE_OUTPUT_KEYS.RESEARCH_AGENT_CORE_RUNTIME_ARN
+      );
+      researchRuntimeName = researchRemoteOutputs.get(
+        REMOTE_OUTPUT_KEYS.RESEARCH_AGENT_CORE_RUNTIME_NAME
+      );
     }
 
     // Common security group for saving ENI in Closed network mode
@@ -139,6 +166,48 @@ export class GenerativeAiUseCasesStack extends Stack {
     // Database
     const database = new Database(this, 'Database');
 
+    let useCaseBuilder: UseCaseBuilder | undefined;
+    if (params.useCaseBuilderEnabled || params.agentBuilderEnabled) {
+      useCaseBuilder = new UseCaseBuilder(this, 'UseCaseBuilder');
+    }
+
+    // RAG (if enabled)
+    let rag: Rag | undefined;
+    if (params.ragEnabled) {
+      rag = new Rag(this, 'Rag', {
+        envSuffix: params.env,
+        kendraIndexLanguage: params.kendraIndexLanguage,
+        kendraIndexArnInCdkContext: params.kendraIndexArn,
+        kendraDataSourceBucketName: params.kendraDataSourceBucketName,
+        kendraIndexScheduleEnabled: params.kendraIndexScheduleEnabled,
+        kendraIndexScheduleCreateCron: params.kendraIndexScheduleCreateCron,
+        kendraIndexScheduleDeleteCron: params.kendraIndexScheduleDeleteCron,
+        userPoolProviderUrl: auth.userPool.userPoolProviderUrl,
+        vpc: props.vpc,
+        securityGroups,
+      });
+    }
+
+    // Transcribe
+    const transcribe = new Transcribe(this, 'Transcribe', {
+      userPool: auth.userPool,
+      idPool: auth.idPool,
+      allowedIpV4AddressRanges: params.allowedIpV4AddressRanges,
+      allowedIpV6AddressRanges: params.allowedIpV6AddressRanges,
+      vpc: props.vpc,
+      securityGroups,
+    });
+
+    // SpeechToSpeech (for bidirectional communication)
+    const speechToSpeech = new SpeechToSpeech(this, 'SpeechToSpeech', {
+      envSuffix: params.env,
+      userPool: auth.userPool,
+      speechToSpeechModelIds: params.speechToSpeechModelIds,
+      crossAccountBedrockRoleArn: params.crossAccountBedrockRoleArn,
+      vpc: props.vpc,
+      securityGroups,
+    });
+
     // API
     const api = new Api(this, 'API', {
       modelRegion: params.modelRegion,
@@ -151,11 +220,6 @@ export class GenerativeAiUseCasesStack extends Stack {
       queryDecompositionEnabled: params.queryDecompositionEnabled,
       rerankingModelId: params.rerankingModelId,
       crossAccountBedrockRoleArn: params.crossAccountBedrockRoleArn,
-      allowedIpV4AddressRanges: params.allowedIpV4AddressRanges,
-      allowedIpV6AddressRanges: params.allowedIpV6AddressRanges,
-      additionalS3Buckets: props.agentCoreStack?.fileBucket
-        ? [props.agentCoreStack.fileBucket]
-        : undefined,
       userPool: auth.userPool,
       idPool: auth.idPool,
       userPoolClient: auth.client,
@@ -168,7 +232,36 @@ export class GenerativeAiUseCasesStack extends Stack {
       vpc: props.vpc,
       securityGroups,
       apiGatewayVpcEndpoint: props.apiGatewayVpcEndpoint,
-      cognitoUserPoolProxyEndpoint: props.cognitoUserPoolProxyEndpoint,
+      // RAG Kendra
+      kendraIndexId: rag?.kendraIndexId,
+      kendraIndexLanguage: rag?.kendraIndexLanguage,
+      // Use Case Builder / Agent Builder
+      useCaseBuilderTable: useCaseBuilder?.useCaseBuilderTable,
+      useCaseIdIndexName: useCaseBuilder?.useCaseIdIndexName,
+      agentBuilderRuntimeArn,
+      // Transcribe
+      audioBucket: transcribe.audioBucket,
+      transcriptBucket: transcribe.transcriptBucket,
+      // Speech to Speech
+      speechToSpeechTaskFunctionArn:
+        speechToSpeech.speechToSpeechTaskFunctionArn,
+      speechToSpeechModelIds: params.speechToSpeechModelIds,
+      // IP restrictions
+      allowedIpV4AddressRanges: params.allowedIpV4AddressRanges ?? undefined,
+      allowedIpV6AddressRanges: params.allowedIpV6AddressRanges ?? undefined,
+      // Additional S3 buckets (AgentCore FileBucket)
+      additionalS3Buckets: [
+        ...(props.agentCoreStack?.fileBucket
+          ? [props.agentCoreStack.fileBucket]
+          : []),
+        ...(props.researchAgentCoreStack?.fileBucket
+          ? [props.researchAgentCoreStack.fileBucket]
+          : []),
+      ].filter(Boolean),
+      // Knowledge Base data source bucket
+      knowledgeBaseDataSourceBucketName:
+        props.knowledgeBaseDataSourceBucketName,
+      dataSourceBucketName: rag?.dataSourceBucketName,
     });
 
     // WAF
@@ -192,17 +285,6 @@ export class GenerativeAiUseCasesStack extends Stack {
         webAclArn: regionalWaf.webAclArn,
       });
     }
-
-    // SpeechToSpeech (for bidirectional communication)
-    const speechToSpeech = new SpeechToSpeech(this, 'SpeechToSpeech', {
-      envSuffix: params.env,
-      api: api.api,
-      userPool: auth.userPool,
-      speechToSpeechModelIds: params.speechToSpeechModelIds,
-      crossAccountBedrockRoleArn: params.crossAccountBedrockRoleArn,
-      vpc: props.vpc,
-      securityGroups,
-    });
 
     // Load MCP configuration for Web frontend
     const mcpServers = loadMCPConfig(
@@ -230,13 +312,15 @@ export class GenerativeAiUseCasesStack extends Stack {
     if (
       params.agentCoreExternalRuntimes.length > 0 ||
       genericRuntimeArn ||
-      agentBuilderRuntimeArn
+      agentBuilderRuntimeArn ||
+      researchRuntimeArn
     ) {
       new AgentCore(this, 'AgentCore', {
         agentCoreExternalRuntimes: params.agentCoreExternalRuntimes,
         idPool: auth.idPool,
         genericRuntimeArn,
         agentBuilderRuntimeArn,
+        researchRuntimeArn,
       });
     }
 
@@ -256,6 +340,7 @@ export class GenerativeAiUseCasesStack extends Stack {
       predictStreamFunctionArn: api.predictStreamFunction.functionArn,
       ragEnabled: params.ragEnabled,
       ragKnowledgeBaseEnabled: params.ragKnowledgeBaseEnabled,
+      ragKnowledgeBaseStorageType: params.ragKnowledgeBaseStorageType,
       agentEnabled: params.agentEnabled || params.agents.length > 0,
       flows: params.flows,
       flowStreamFunctionArn: api.invokeFlowFunction.functionArn,
@@ -296,6 +381,14 @@ export class GenerativeAiUseCasesStack extends Stack {
         : undefined,
       agentCoreExternalRuntimes: params.agentCoreExternalRuntimes,
       agentCoreRegion: params.agentCoreRegion,
+      researchAgentEnabled: params.researchAgentEnabled,
+      researchAgentRuntime: researchRuntimeArn
+        ? {
+            name: researchRuntimeName || 'ResearchAgentCoreRuntime',
+            arn: researchRuntimeArn,
+            description: 'Research Agent Core Runtime with Claude Agent SDK',
+          }
+        : undefined,
       // Frontend
       hiddenUseCases: params.hiddenUseCases,
       // Custom Domain
@@ -305,119 +398,38 @@ export class GenerativeAiUseCasesStack extends Stack {
       hostedZoneId: params.hostedZoneId,
       // Closed network
       webBucket: props.webBucket,
-      cognitoUserPoolProxyEndpoint: props.cognitoUserPoolProxyEndpoint,
-      cognitoIdentityPoolProxyEndpoint: props.cognitoIdentityPoolProxyEndpoint,
       // Branding
       brandingConfig: params.brandingConfig,
     });
 
-    // RAG
-    if (params.ragEnabled) {
-      const rag = new Rag(this, 'Rag', {
-        envSuffix: params.env,
-        kendraIndexLanguage: params.kendraIndexLanguage,
-        kendraIndexArnInCdkContext: params.kendraIndexArn,
-        kendraDataSourceBucketName: params.kendraDataSourceBucketName,
-        kendraIndexScheduleEnabled: params.kendraIndexScheduleEnabled,
-        kendraIndexScheduleCreateCron: params.kendraIndexScheduleCreateCron,
-        kendraIndexScheduleDeleteCron: params.kendraIndexScheduleDeleteCron,
-        userPool: auth.userPool,
-        api: api.api,
-        vpc: props.vpc,
-        securityGroups,
-      });
-
-      // Allow downloading files from the File API to the data source Bucket
-      // If you are importing existing Kendra, there is a possibility that the data source is not S3
-      // In that case, rag.dataSourceBucketName will be undefined and the permission will not be granted
-      if (
-        rag.dataSourceBucketName &&
-        api.getFileDownloadSignedUrlFunction.role
-      ) {
-        allowS3AccessWithSourceIpCondition(
-          rag.dataSourceBucketName,
-          api.getFileDownloadSignedUrlFunction.role,
-          'read',
-          {
-            ipv4: params.allowedIpV4AddressRanges,
-            ipv6: params.allowedIpV6AddressRanges,
-          }
-        );
-      }
-    }
-
-    // RAG Knowledge Base
-    if (params.ragKnowledgeBaseEnabled) {
-      const knowledgeBaseId =
-        params.ragKnowledgeBaseId || props.knowledgeBaseId;
-      if (knowledgeBaseId) {
-        new RagKnowledgeBase(this, 'RagKnowledgeBase', {
-          modelRegion: params.modelRegion,
-          crossAccountBedrockRoleArn: params.crossAccountBedrockRoleArn,
-          knowledgeBaseId: knowledgeBaseId,
-          userPool: auth.userPool,
-          api: api.api,
-          vpc: props.vpc,
-          securityGroups,
-        });
-        // Allow downloading files from the File API to the data source Bucket
-        if (
-          props.knowledgeBaseDataSourceBucketName &&
-          api.getFileDownloadSignedUrlFunction.role
-        ) {
-          allowS3AccessWithSourceIpCondition(
-            props.knowledgeBaseDataSourceBucketName,
-            api.getFileDownloadSignedUrlFunction.role,
-            'read',
-            {
-              ipv4: params.allowedIpV4AddressRanges,
-              ipv6: params.allowedIpV6AddressRanges,
-            }
-          );
+    // Update API handler with web URL for CORS.
+    // In closed network mode, web.webUrl is a placeholder ('CLOSED_NETWORK_MODE')
+    // because the real URL is owned by ClosedNetworkStack. Read it via
+    // RemoteOutputs (soft cross-stack ref, no Fn::ImportValue) and allow both
+    // the ALB DNS origin and the custom domain so an ALB-DNS test env can move
+    // to a domain with a single deploy and no CORS gap during the transition.
+    let allowedOrigins: string[] = [web.webUrl];
+    let displayWebUrl = web.webUrl;
+    if (props.closedNetworkStack) {
+      const closedNetworkOutputs = new RemoteOutputs(
+        this,
+        'ClosedNetworkRemoteOutputs',
+        {
+          stack: props.closedNetworkStack,
+          alwaysUpdate: true,
+          timeout: Duration.seconds(600),
         }
-      }
+      );
+      const albOrigin = closedNetworkOutputs.get(
+        REMOTE_OUTPUT_KEYS.CLOSED_NETWORK_ALB_ORIGIN
+      );
+      const closedWebUrl = closedNetworkOutputs.get(
+        REMOTE_OUTPUT_KEYS.CLOSED_NETWORK_WEB_URL
+      );
+      allowedOrigins = [albOrigin, closedWebUrl];
+      displayWebUrl = closedWebUrl;
     }
-
-    // UseCaseBuilder - create only if UseCaseBuilder or AgentBuilder is enabled
-    let useCaseBuilder: UseCaseBuilder | undefined;
-    if (params.useCaseBuilderEnabled || params.agentBuilderEnabled) {
-      useCaseBuilder = new UseCaseBuilder(this, 'UseCaseBuilder', {
-        userPool: auth.userPool,
-        api: api.api,
-        vpc: props.vpc,
-        securityGroups,
-        useCaseBuilderEnabled: params.useCaseBuilderEnabled,
-      });
-    }
-
-    // Agent Builder (if enabled and runtime is available)
-    if (
-      params.agentBuilderEnabled &&
-      agentBuilderRuntimeArn &&
-      useCaseBuilder
-    ) {
-      new AgentBuilder(this, 'AgentBuilder', {
-        userPool: auth.userPool,
-        api: api.api,
-        vpc: props.vpc,
-        securityGroups,
-        agentBuilderRuntimeArn,
-        useCaseBuilderTable: useCaseBuilder.useCaseBuilderTable,
-        useCaseIdIndexName: useCaseBuilder.useCaseIdIndexName,
-        cognitoUserPoolProxyEndpoint: props.cognitoUserPoolProxyEndpoint,
-      });
-    }
-
-    // Transcribe
-    new Transcribe(this, 'Transcribe', {
-      userPool: auth.userPool,
-      idPool: auth.idPool,
-      api: api.api,
-      allowedIpV4AddressRanges: params.allowedIpV4AddressRanges,
-      allowedIpV6AddressRanges: params.allowedIpV6AddressRanges,
-      vpc: props.vpc,
-      securityGroups,
-    });
+    api.apiHandler.addEnvironment('ALLOWED_ORIGINS', allowedOrigins.join(','));
 
     // Cfn Outputs
     new CfnOutput(this, 'Region', {
@@ -425,7 +437,7 @@ export class GenerativeAiUseCasesStack extends Stack {
     });
 
     new CfnOutput(this, 'WebUrl', {
-      value: web.webUrl,
+      value: displayWebUrl,
     });
 
     new CfnOutput(this, 'ApiEndpoint', {
@@ -462,6 +474,10 @@ export class GenerativeAiUseCasesStack extends Stack {
 
     new CfnOutput(this, 'RagKnowledgeBaseEnabled', {
       value: params.ragKnowledgeBaseEnabled.toString(),
+    });
+
+    new CfnOutput(this, 'RagKnowledgeBaseStorageType', {
+      value: params.ragKnowledgeBaseStorageType,
     });
 
     new CfnOutput(this, 'AgentEnabled', {
@@ -576,6 +592,55 @@ export class GenerativeAiUseCasesStack extends Stack {
     new CfnOutput(this, 'McpServersConfig', {
       value: safeMCPConfig,
     });
+
+    // Additional outputs for backend development
+    new CfnOutput(this, 'TableName', {
+      value: database.table.tableName,
+    });
+
+    new CfnOutput(this, 'StatsTableName', {
+      value: database.statsTable.tableName,
+    });
+
+    new CfnOutput(this, 'BucketName', {
+      value: api.fileBucket.bucketName,
+    });
+
+    new CfnOutput(this, 'QueryDecompositionEnabled', {
+      value: params.queryDecompositionEnabled.toString(),
+    });
+
+    new CfnOutput(this, 'RerankingModelId', {
+      value: params.rerankingModelId ?? '',
+    });
+
+    if (useCaseBuilder?.useCaseBuilderTable) {
+      new CfnOutput(this, 'UseCaseTableName', {
+        value: useCaseBuilder.useCaseBuilderTable.tableName,
+      });
+
+      new CfnOutput(this, 'UseCaseIdIndexName', {
+        value: useCaseBuilder.useCaseIdIndexName,
+      });
+    }
+
+    if (transcribe?.audioBucket) {
+      new CfnOutput(this, 'AudioBucketName', {
+        value: transcribe.audioBucket.bucketName,
+      });
+    }
+
+    if (transcribe?.transcriptBucket) {
+      new CfnOutput(this, 'TranscriptBucketName', {
+        value: transcribe.transcriptBucket.bucketName,
+      });
+    }
+
+    if (params.ragEnabled && rag?.kendraIndexId) {
+      new CfnOutput(this, 'IndexId', {
+        value: rag.kendraIndexId,
+      });
+    }
 
     this.userPool = auth.userPool;
     this.userPoolClient = auth.client;

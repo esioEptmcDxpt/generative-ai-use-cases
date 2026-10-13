@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import InputChatContent from '../components/InputChatContent';
 import useChat from '../hooks/useChat';
@@ -33,6 +39,10 @@ import ModelParameters from '../components/ModelParameters';
 import { AcceptedDotExtensions } from '../utils/MediaUtils';
 import { useTranslation } from 'react-i18next';
 
+// File size limits for Chat (Lambda route: API Gateway → Lambda → Bedrock Converse API)
+// - Lambda synchronous payload limit: 6MB
+// - File data is base64-encoded in the request, so max original file size ≈ 6MB / 1.33 ≈ 4.5MB
+// - Bedrock Converse API document limit: 4.5MB per document (except Claude 4+ PDF and Nova PDF/DOCX)
 const fileLimit: FileLimit = {
   accept: AcceptedDotExtensions,
   maxFileCount: 5,
@@ -187,13 +197,65 @@ const ChatPage: React.FC = () => {
   const reasoning = useMemo(() => {
     return MODELS.getModelMetadata(modelId).flags.reasoning ?? false;
   }, [modelId]);
+  const adaptiveThinking = useMemo(() => {
+    return MODELS.getModelMetadata(modelId).flags.adaptiveThinking ?? false;
+  }, [modelId]);
+  const adaptiveThinkingAlwaysOn = useMemo(() => {
+    return (
+      MODELS.getModelMetadata(modelId).flags.adaptiveThinkingAlwaysOn ?? false
+    );
+  }, [modelId]);
+  const xhighEffort = useMemo(() => {
+    return MODELS.getModelMetadata(modelId).flags.xhighEffort ?? false;
+  }, [modelId]);
   const reasoningEnabled = useMemo(() => {
-    return overrideModelParameters.reasoningConfig.type === 'enabled';
+    return (
+      overrideModelParameters.reasoningConfig.type === 'enabled' ||
+      overrideModelParameters.reasoningConfig.type === 'adaptive'
+    );
   }, [overrideModelParameters]);
   // Currently, the settings modal is only used with the reasoning option
   const setting = useMemo(() => {
     return reasoning;
   }, [reasoning]);
+
+  // Whether reasoning was force-enabled by an always-on model while the
+  // user had it disabled, so the disabled state can be restored later
+  const reasoningForcedByAlwaysOn = useRef(false);
+
+  // When model changes, update reasoning type if reasoning is already enabled.
+  // For models whose adaptive thinking is always on (e.g. Claude Sonnet 5),
+  // reasoning is force-enabled while the model is selected, and the user's
+  // original disabled state is restored when switching away.
+  useEffect(() => {
+    setOverrideModelParameters((prev) => {
+      const config = prev.reasoningConfig;
+      const enabled = config.type === 'enabled' || config.type === 'adaptive';
+
+      let newType = config.type;
+      if (adaptiveThinkingAlwaysOn) {
+        if (!enabled) {
+          reasoningForcedByAlwaysOn.current = true;
+        }
+        newType = 'adaptive';
+      } else if (reasoningForcedByAlwaysOn.current) {
+        reasoningForcedByAlwaysOn.current = false;
+        newType = 'disabled';
+      } else if (enabled) {
+        newType = adaptiveThinking ? 'adaptive' : 'enabled';
+      }
+
+      const newEffort =
+        config.effort === 'xhigh' && !xhighEffort ? 'high' : config.effort;
+      if (config.type === newType && config.effort === newEffort) {
+        return prev;
+      }
+      return {
+        ...prev,
+        reasoningConfig: { ...config, type: newType, effort: newEffort },
+      };
+    });
+  }, [adaptiveThinking, adaptiveThinkingAlwaysOn, xhighEffort]);
 
   useEffect(() => {
     const _modelId = !modelId ? availableModels[0] : modelId;
@@ -218,10 +280,13 @@ const ChatPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, setContent, availableModels, pathname]);
 
-  const onSend = useCallback(() => {
+  const onSend = useCallback(async () => {
     setFollowing(true);
-    postChat(
-      prompter.chatPrompt({ content }),
+    const savedContent = content;
+    setContent('');
+    clearFiles();
+    const success = await postChat(
+      prompter.chatPrompt({ content: savedContent }),
       false,
       undefined,
       undefined,
@@ -233,8 +298,9 @@ const ChatPage: React.FC = () => {
       base64Cache,
       overrideModelParameters
     );
-    setContent('');
-    clearFiles();
+    if (!success) {
+      setContent(savedContent);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     content,
@@ -417,14 +483,29 @@ const ChatPage: React.FC = () => {
   };
 
   const onReasoningSwitched = useCallback(() => {
-    setOverrideModelParameters({
-      ...overrideModelParameters,
-      reasoningConfig: {
-        type: reasoningEnabled ? 'disabled' : 'enabled',
-        budgetTokens: overrideModelParameters.reasoningConfig.budgetTokens,
-      },
-    });
-  }, [reasoningEnabled, overrideModelParameters, setOverrideModelParameters]);
+    if (reasoningEnabled) {
+      setOverrideModelParameters({
+        ...overrideModelParameters,
+        reasoningConfig: {
+          ...overrideModelParameters.reasoningConfig,
+          type: 'disabled',
+        },
+      });
+    } else {
+      setOverrideModelParameters({
+        ...overrideModelParameters,
+        reasoningConfig: {
+          ...overrideModelParameters.reasoningConfig,
+          type: adaptiveThinking ? 'adaptive' : 'enabled',
+        },
+      });
+    }
+  }, [
+    reasoningEnabled,
+    adaptiveThinking,
+    overrideModelParameters,
+    setOverrideModelParameters,
+  ]);
 
   const handleDragOver = (event: React.DragEvent) => {
     // When a file is dragged, display the overlay
@@ -615,7 +696,7 @@ const ChatPage: React.FC = () => {
             fileUpload={fileUpload}
             fileLimit={fileLimit}
             accept={accept}
-            reasoning={reasoning}
+            reasoning={reasoning && !adaptiveThinkingAlwaysOn}
             onReasoningSwitched={onReasoningSwitched}
             reasoningEnabled={reasoningEnabled}
             setting={setting}
