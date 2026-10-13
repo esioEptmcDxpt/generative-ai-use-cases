@@ -11,10 +11,12 @@ export const REMOTE_OUTPUT_KEYS = {
   AGENT_BUILDER_AGENT_CORE_RUNTIME_NAME: 'AgentBuilderAgentCoreRuntimeName',
   FILE_BUCKET_NAME: 'FileBucketName',
 
-  // Application Inference Profile Stack
-  INFERENCE_PROFILE_ARNS: 'InferenceProfileArns',
-} as const;
+  // Research Agent Core Stack
+  RESEARCH_AGENT_CORE_RUNTIME_ARN: 'ResearchAgentCoreRuntimeArn',
+  RESEARCH_AGENT_CORE_RUNTIME_NAME: 'ResearchAgentCoreRuntimeName',
+  RESEARCH_AGENT_FILE_BUCKET_NAME: 'ResearchAgentFileBucketName',
 
-// No longer needed - inference profiles are now in a single JSON output
-// export const getInferenceProfileOutputKey = (sanitizedModelId: string) =>
-//   `InferenceProfile-${sanitizedModelId}-Arn`;
+  // Closed Network Stack
+  CLOSED_NETWORK_ALB_ORIGIN: 'ClosedNetworkAlbOrigin',
+  CLOSED_NETWORK_WEB_URL: 'ClosedNetworkWebUrl',
+} as const;

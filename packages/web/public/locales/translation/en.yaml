@@ -119,8 +119,12 @@ agent_builder:
   tool_settings: Tool Settings
   updated: Updated date
 agent_core:
+  agent_list: Agent List
+  description_label: Description
   model: Model
+  no_agents: No agents available
   runtime: Runtime
+  search_agents: Search agents...
   start_conversation: Start a conversation with AgentCore
   title: AgentCore
 agent_dashboard: {}
@@ -128,6 +132,17 @@ auth:
   loading: Loading...
   login: Login
   title: Generative AI Use Cases on AWS
+chart:
+  data_limit_exceeded: Chart data exceeds the display limit. Please reduce the number of data points (max 10,000) or series (max 50).
+  download_png: Download PNG
+  geojson_load_failed: Failed to load map data
+  invalid_data: Invalid chart data
+  label: Chart
+  loading: Loading chart data...
+  map_source_attribution: 'Source: Ministry of Land, Infrastructure, Transport and Tourism - National Land Numerical Information'
+  view_chart: View Chart
+  view_code: View Code
+  zoom: Zoom chart
 chat:
   advanced_options: Advanced Options
   create_link: Create Link
@@ -142,7 +157,7 @@ chat:
   drop_files: Drop files here
   hint_cmd_enter: ⌘ + Enter to Submit
   hint_ctrl_enter: Ctrl + Enter to Submit
-  history: Conversation History
+  history: History
   initialize: Initialize
   open_link: Open Link
   prompt_examples: Prompt Examples
@@ -453,6 +468,12 @@ drawer:
   generative_ai: Generative AI
   tools: Tools
   use_cases: Use Cases
+error:
+  streamingError:
+    ACCESS_DENIED: The selected model is not enabled. Please enable the model in the Amazon Bedrock console.
+    PAYLOAD_TOO_LARGE: The attached file is too large. Please reduce the file size or number of attachments and try again.
+    THROTTLING: The server is currently experiencing high traffic. Please try again later.
+    UNKNOWN_ERROR: An error occurred. Please try again or contact the administrator.
 feedback:
   additional_feedback: If you have any additional feedback, please enter it here. (optional)
   reason_error: Please select a reason.
@@ -587,6 +608,8 @@ generateText:
   result_placeholder: Generated text will be displayed here
   source_info: Source information for text
   title: Text Generation
+image:
+  load_error: '[Image error: {{error}}]'
 inputs:
   attachment: Attachment
   reasoning: Extended thinking
@@ -865,7 +888,16 @@ meetingMinutes:
   no_transcript: No Transcript
   option: Option
   partial_indicator: (...)
+  prompt_title_placeholder: Enter a name for this prompt...
   record_transcribe: Record & Transcribe
+  save_as_prompt: Save as Custom Prompt
+  saved_prompt_body: Prompt Content
+  saved_prompt_created: Custom prompt saved
+  saved_prompt_delete_confirm: Delete this prompt?
+  saved_prompt_deleted: Custom prompt deleted
+  saved_prompt_prefix: ★
+  saved_prompt_title: Prompt Title
+  saved_prompt_updated: Custom prompt updated
   screen_audio_error: Screen Audio Error
   settings: Settings
   speech_recognition: Speech Recognition
@@ -891,6 +923,7 @@ meetingMinutes:
 model:
   parameters:
     reasoning_budget: Token budget for extended thinking
+    reasoning_effort: Thinking effort level
 navigation:
   agentChat: Agent Chat
   chat: Chat
@@ -965,6 +998,18 @@ rag:
   please_refer: .
   retrieving: Retrieving reference documents from Kendra...
   title: RAG Chat
+research:
+  description: Conducts various research tasks across industries using web search and creates detailed research reports.
+  general_research: General Research
+  general_research_desc: Researches information across a wide range of fields and provides comprehensive analysis
+  label: Research
+  mini_research: Quick Research
+  mini_research_desc: Quickly researches key points and provides concise answers
+  select_mode: Select a mode
+  start_conversation: Start conversation with Research Agent
+  technical_research: Technical Research
+  technical_research_desc: Conducts detailed technical research and analysis
+  title: Research
 setting:
   ai_items:
     agent_name: Agent Name
@@ -1036,6 +1081,15 @@ summarize:
   result_placeholder: Summarized text will be displayed here
   text_to_summarize: Text to summarize
   title: Summarize
+svg:
+  download_as_png: Download as PNG
+  download_as_svg: Download as SVG
+  invalid_syntax: Invalid SVG syntax
+  png_error: 'PNG output error: '
+  preview_alt: SVG Preview
+  show_code: Show Code
+  show_preview: Show Preview
+  svg_error: 'SVG output error: '
 transcribe:
   detailed_parameters: Detailed parameters
   direct_input: Direct Input

@@ -74,7 +74,7 @@ const envs: Record<string, Partial<StackInput>> = {
 ## Deployment Method
 
 After configuring the `closedNetwork...` options, deploy using the normal procedure written in [README.md](/README.md). An additional stack called ClosedNetworkStack\<environment name> will be deployed. (For convenience, \<environment name> will be omitted hereafter.)
-The URL for accessing GenU is output in the WebUrl of ClosedNetworkStack. Note that it's not the WebUrl of GenerativeAiUseCasesStack.
+The URL for accessing GenU is output in the ClosedNetworkWebUrl of ClosedNetworkStack. Note that it's not the WebUrl of GenerativeAiUseCasesStack.
 Also, GenU cannot be accessed until the deployment of GenerativeAiUseCasesStack is complete.
 
 ## Verification Method
@@ -102,7 +102,7 @@ Please copy the result of executing this command.
 
 ### Step 3. Access GenU
 
-Open the Edge browser within Windows, enter the URL displayed in the WebUrl output of ClosedNetworkStack to access GenU.
+Open the Edge browser within Windows, enter the URL displayed in the ClosedNetworkWebUrl output of ClosedNetworkStack to access GenU.
 SignUp is required on first access.
 
 ### About the Verification Instance
@@ -144,10 +144,11 @@ The endpoints that require name resolution from clients are as follows. Parts en
 
 | Service Name                | Role                        | Endpoint                                                     | How to Check Endpoint                                                                         |
 | --------------------------- | --------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| Application Load Balancer   | Web static file server      | Custom domain or internal-\<aaa>.\<region>.elb.amazonaws.com | Check with WebUrl output of ClosedNetworkStack                                                |
+| Application Load Balancer   | Web static file server      | Custom domain or internal-\<aaa>.\<region>.elb.amazonaws.com | Check with ClosedNetworkWebUrl output of ClosedNetworkStack                                   |
 | API Gateway                 | Main API                    | \<xxx>.execute-api.\<region>.amazonaws.com                   | Check with ApiEndpoint output of **GenerativeAiUseCasesStack**                                |
 | API Gateway                 | Cognito User Pool proxy     | \<yyy>.execute-api.\<region>.amazonaws.com                   | Check with CognitoPrivateProxyCognitoUserPoolProxyApiEndpoint... output of ClosedNetworkStack |
 | API Gateway                 | Cognito Identity Pool proxy | \<zzz>.execute-api.\<region>.amazonaws.com                   | Check with CognitoPrivateProxyCognitoIdPoolProxyApiEndpoint... output of ClosedNetworkStack   |
+| Amazon S3                   | Signed URLs                 | s3.\<region>.amazonaws.com                                   | Endpoint is fixed                                                                             |
 | AWS Lambda                  | Streaming output            | lambda.\<region>.amazonaws.com                               | Endpoint is fixed                                                                             |
 | Amazon Transcribe           | Speech-to-text              | transcribe.\<region>.amazonaws.com                           | Endpoint is fixed                                                                             |
 | Amazon Transcribe Streaming | Real-time speech-to-text    | transcribestreaming.\<region>.amazonaws.com                  | Endpoint is fixed                                                                             |
@@ -171,6 +172,7 @@ The following summarizes the endpoints that need configuration and how to check 
 | API Gateway                 | Main API                    | \<xxx>.execute-api.\<region>.amazonaws.com                   | Method 2                |
 | API Gateway                 | Cognito User Pool proxy     | \<yyy>.execute-api.\<region>.amazonaws.com                   | Method 2                |
 | API Gateway                 | Cognito Identity Pool proxy | \<zzz>.execute-api.\<region>.amazonaws.com                   | Method 2                |
+| Amazon S3                   | Signed URLs                 | \<S3 bucket name>.s3.\<region>.amazonaws.com                 | Method 2                |
 | AWS Lambda                  | Streaming output            | lambda.\<region>.amazonaws.com                               | Method 2                |
 | Amazon Transcribe           | Speech-to-text              | transcribe.\<region>.amazonaws.com                           | Method 2                |
 | Amazon Transcribe Streaming | Real-time speech-to-text    | transcribestreaming.\<region>.amazonaws.com                  | Method 2                |

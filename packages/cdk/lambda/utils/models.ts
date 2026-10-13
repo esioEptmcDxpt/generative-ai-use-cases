@@ -41,9 +41,6 @@ const modelIds: ModelConfiguration[] = (
   .map((model) => ({
     modelId: model.modelId.trim(),
     region: model.region.trim(),
-    ...(model.inferenceProfileArn && {
-      inferenceProfileArn: model.inferenceProfileArn,
-    }),
   }))
   .filter((model) => model.modelId);
 // If there is a lightweight model among the available models, prioritize the lightweight model.
@@ -55,9 +52,6 @@ export const defaultModel: Model = {
   type: 'bedrock',
   modelId: defaultModelConfiguration.modelId,
   region: defaultModelConfiguration.region,
-  ...(defaultModelConfiguration.inferenceProfileArn && {
-    inferenceProfileArn: defaultModelConfiguration.inferenceProfileArn,
-  }),
 };
 
 const imageGenerationModels: ModelConfiguration[] = (
@@ -69,9 +63,6 @@ const imageGenerationModels: ModelConfiguration[] = (
     (model: ModelConfiguration): ModelConfiguration => ({
       modelId: model.modelId.trim(),
       region: model.region.trim(),
-      ...(model.inferenceProfileArn && {
-        inferenceProfileArn: model.inferenceProfileArn,
-      }),
     })
   )
   .filter((model) => model.modelId);
@@ -79,9 +70,6 @@ export const defaultImageGenerationModel: Model = {
   type: 'bedrock',
   modelId: imageGenerationModels?.[0]?.modelId ?? '',
   region: imageGenerationModels?.[0]?.region ?? '',
-  ...(imageGenerationModels?.[0]?.inferenceProfileArn && {
-    inferenceProfileArn: imageGenerationModels[0].inferenceProfileArn,
-  }),
 };
 
 const videoGenerationModels: ModelConfiguration[] = (
@@ -93,9 +81,6 @@ const videoGenerationModels: ModelConfiguration[] = (
     (model: ModelConfiguration): ModelConfiguration => ({
       modelId: model.modelId.trim(),
       region: model.region.trim(),
-      ...(model.inferenceProfileArn && {
-        inferenceProfileArn: model.inferenceProfileArn,
-      }),
     })
   )
   .filter((model) => model.modelId);
@@ -103,9 +88,6 @@ export const defaultVideoGenerationModel: Model = {
   type: 'bedrock',
   modelId: videoGenerationModels?.[0]?.modelId ?? '',
   region: videoGenerationModels?.[0]?.region ?? '',
-  ...(videoGenerationModels?.[0]?.inferenceProfileArn && {
-    inferenceProfileArn: videoGenerationModels[0].inferenceProfileArn,
-  }),
 };
 
 // Model Params
@@ -145,6 +127,50 @@ const CLAUDE_OPUS_4_5_DEFAULT_PARAMS: ConverseInferenceParams = {
   inferenceConfig: {
     maxTokens: 64000,
     temperature: 1,
+  },
+};
+
+const CLAUDE_OPUS_4_6_DEFAULT_PARAMS: ConverseInferenceParams = {
+  inferenceConfig: {
+    maxTokens: 128000,
+    temperature: 1,
+  },
+};
+
+const CLAUDE_OPUS_5_DEFAULT_PARAMS: ConverseInferenceParams = {
+  inferenceConfig: {
+    maxTokens: 128000,
+  },
+};
+
+const CLAUDE_OPUS_4_8_DEFAULT_PARAMS: ConverseInferenceParams = {
+  inferenceConfig: {
+    maxTokens: 128000,
+  },
+};
+
+const CLAUDE_OPUS_4_7_DEFAULT_PARAMS: ConverseInferenceParams = {
+  inferenceConfig: {
+    maxTokens: 128000,
+  },
+};
+
+const CLAUDE_SONNET_4_6_DEFAULT_PARAMS: ConverseInferenceParams = {
+  inferenceConfig: {
+    maxTokens: 64000,
+    temperature: 1,
+  },
+};
+
+const CLAUDE_SONNET_5_DEFAULT_PARAMS: ConverseInferenceParams = {
+  inferenceConfig: {
+    maxTokens: 128000,
+  },
+};
+
+const CLAUDE_FABLE_5_DEFAULT_PARAMS: ConverseInferenceParams = {
+  inferenceConfig: {
+    maxTokens: 128000,
   },
 };
 
@@ -406,27 +432,6 @@ const mergeConverseInferenceParams = (
     },
   }) as ConverseInferenceParams;
 
-// Get inference profile ARN from modelId
-export const getInferenceProfileArn = (modelId: string): string | undefined => {
-  const textModelConfig = modelIds.find((config) => config.modelId === modelId);
-  if (textModelConfig?.inferenceProfileArn) {
-    return textModelConfig.inferenceProfileArn;
-  }
-  const imageModelConfig = imageGenerationModels.find(
-    (config) => config.modelId === modelId
-  );
-  if (imageModelConfig?.inferenceProfileArn) {
-    return imageModelConfig.inferenceProfileArn;
-  }
-  const videoModelConfig = videoGenerationModels.find(
-    (config) => config.modelId === modelId
-  );
-  if (videoModelConfig?.inferenceProfileArn) {
-    return videoModelConfig.inferenceProfileArn;
-  }
-  return undefined;
-};
-
 // API call, extract string from output, etc.
 
 const createConverseCommandInput = (
@@ -525,32 +530,48 @@ const createConverseCommandInput = (
 
   const guardrailConfig = createGuardrailConfig();
 
-  const modelIdOrArn = getInferenceProfileArn(model.modelId) || model.modelId;
   const converseCommandInput: ConverseCommandInput = {
-    modelId: modelIdOrArn,
+    modelId: model.modelId,
     messages: conversationWithCache,
     system: systemContextWithCache,
-    inferenceConfig: params.inferenceConfig,
+    inferenceConfig: modelMetadata[model.modelId].flags.noSamplingParams
+      ? { maxTokens: params.inferenceConfig?.maxTokens }
+      : params.inferenceConfig,
     guardrailConfig,
   };
 
   if (
     modelMetadata[model.modelId].flags.reasoning &&
-    model.modelParameters?.reasoningConfig?.type === 'enabled'
+    (model.modelParameters?.reasoningConfig?.type === 'enabled' ||
+      model.modelParameters?.reasoningConfig?.type === 'adaptive')
   ) {
+    const noSampling = modelMetadata[model.modelId].flags.noSamplingParams;
     converseCommandInput.inferenceConfig = {
       ...params.inferenceConfig,
-      temperature: 1, // reasoning requires temperature to be 1
+      temperature: noSampling ? undefined : 1, // reasoning requires temperature to be 1, but some models don't support it
       topP: undefined, // reasoning does not require topP
       maxTokens: params.inferenceConfig?.maxTokens,
     };
-    converseCommandInput.additionalModelRequestFields = {
-      reasoning_config: {
-        type: model.modelParameters?.reasoningConfig?.type,
-        budget_tokens:
-          model.modelParameters?.reasoningConfig?.budgetTokens || 0,
-      },
-    };
+
+    if (model.modelParameters?.reasoningConfig?.type === 'adaptive') {
+      // Adaptive thinking (Claude Opus 4.6+)
+      // https://docs.aws.amazon.com/bedrock/latest/userguide/claude-messages-adaptive-thinking.html
+      converseCommandInput.additionalModelRequestFields = {
+        thinking: { type: 'adaptive' },
+        output_config: {
+          effort: model.modelParameters?.reasoningConfig?.effort || 'high',
+        },
+      };
+    } else {
+      // Extended thinking (legacy: Claude 3.7 Sonnet, Claude 4/4.1/4.5)
+      converseCommandInput.additionalModelRequestFields = {
+        reasoning_config: {
+          type: model.modelParameters?.reasoningConfig?.type,
+          budget_tokens:
+            model.modelParameters?.reasoningConfig?.budgetTokens || 0,
+        },
+      };
+    }
   }
 
   return converseCommandInput;
@@ -777,7 +798,8 @@ const createBodyImageAmazonGeneralImage = (params: GenerateImageParams) => {
           (params.textPrompt.find((x) => x.weight > 0)?.text || '') +
           ', ' +
           params.stylePreset,
-        negativeText: params.textPrompt.find((x) => x.weight < 0)?.text,
+        negativeText:
+          params.textPrompt.find((x) => x.weight < 0)?.text || undefined,
         images: [params.initImage],
         similarityStrength: Math.max(params.imageStrength || 0.2, 0.2), // Min 0.2
       },
@@ -791,7 +813,8 @@ const createBodyImageAmazonGeneralImage = (params: GenerateImageParams) => {
           (params.textPrompt.find((x) => x.weight > 0)?.text || '') +
           ', ' +
           params.stylePreset,
-        negativeText: params.textPrompt.find((x) => x.weight < 0)?.text,
+        negativeText:
+          params.textPrompt.find((x) => x.weight < 0)?.text || undefined,
         image: params.initImage,
         maskImage: params.maskImage,
         maskPrompt: params.maskPrompt,
@@ -806,7 +829,8 @@ const createBodyImageAmazonGeneralImage = (params: GenerateImageParams) => {
           (params.textPrompt.find((x) => x.weight > 0)?.text || '') +
           ', ' +
           params.stylePreset,
-        negativeText: params.textPrompt.find((x) => x.weight < 0)?.text,
+        negativeText:
+          params.textPrompt.find((x) => x.weight < 0)?.text || undefined,
         image: params.initImage,
         maskImage: params.maskImage,
         maskPrompt: params.maskPrompt,
@@ -822,7 +846,8 @@ const createBodyImageAmazonGeneralImage = (params: GenerateImageParams) => {
           (params.textPrompt.find((x) => x.weight > 0)?.text || '') +
           ', ' +
           params.stylePreset,
-        negativeText: params.textPrompt.find((x) => x.weight < 0)?.text || '',
+        negativeText:
+          params.textPrompt.find((x) => x.weight < 0)?.text || undefined,
       },
       imageGenerationConfig: imageGenerationConfig,
     };
@@ -841,7 +866,8 @@ const createBodyImageAmazonAdvancedImage = (params: GenerateImageParams) => {
       taskType: 'COLOR_GUIDED_GENERATION',
       colorGuidedGenerationParams: {
         text: params.textPrompt.find((x) => x.weight > 0)?.text || '',
-        negativeText: params.textPrompt.find((x) => x.weight < 0)?.text,
+        negativeText:
+          params.textPrompt.find((x) => x.weight < 0)?.text || undefined,
         referenceImage: params.initImage,
         colors: params.colors!,
       },
@@ -996,6 +1022,206 @@ export const BEDROCK_TEXT_GEN_MODELS: {
     extractConverseStreamOutput: (body: ConverseStreamOutput) => StreamingChunk;
   };
 } = {
+  'global.anthropic.claude-opus-5': {
+    defaultParams: CLAUDE_OPUS_5_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'us.anthropic.claude-opus-5': {
+    defaultParams: CLAUDE_OPUS_5_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'eu.anthropic.claude-opus-5': {
+    defaultParams: CLAUDE_OPUS_5_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'au.anthropic.claude-opus-5': {
+    defaultParams: CLAUDE_OPUS_5_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'global.anthropic.claude-opus-4-8': {
+    defaultParams: CLAUDE_OPUS_4_8_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'us.anthropic.claude-opus-4-8': {
+    defaultParams: CLAUDE_OPUS_4_8_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'eu.anthropic.claude-opus-4-8': {
+    defaultParams: CLAUDE_OPUS_4_8_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'jp.anthropic.claude-opus-4-8': {
+    defaultParams: CLAUDE_OPUS_4_8_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'global.anthropic.claude-opus-4-7': {
+    defaultParams: CLAUDE_OPUS_4_7_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'us.anthropic.claude-opus-4-7': {
+    defaultParams: CLAUDE_OPUS_4_7_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'eu.anthropic.claude-opus-4-7': {
+    defaultParams: CLAUDE_OPUS_4_7_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'jp.anthropic.claude-opus-4-7': {
+    defaultParams: CLAUDE_OPUS_4_7_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'global.anthropic.claude-opus-4-6-v1': {
+    defaultParams: CLAUDE_OPUS_4_6_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'us.anthropic.claude-opus-4-6-v1': {
+    defaultParams: CLAUDE_OPUS_4_6_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'au.anthropic.claude-opus-4-6-v1': {
+    defaultParams: CLAUDE_OPUS_4_6_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'eu.anthropic.claude-opus-4-6-v1': {
+    defaultParams: CLAUDE_OPUS_4_6_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'global.anthropic.claude-sonnet-5': {
+    defaultParams: CLAUDE_SONNET_5_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'us.anthropic.claude-sonnet-5': {
+    defaultParams: CLAUDE_SONNET_5_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'global.anthropic.claude-fable-5': {
+    defaultParams: CLAUDE_FABLE_5_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'global.anthropic.claude-sonnet-4-6': {
+    defaultParams: CLAUDE_SONNET_4_6_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'us.anthropic.claude-sonnet-4-6': {
+    defaultParams: CLAUDE_SONNET_4_6_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'eu.anthropic.claude-sonnet-4-6': {
+    defaultParams: CLAUDE_SONNET_4_6_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'au.anthropic.claude-sonnet-4-6': {
+    defaultParams: CLAUDE_SONNET_4_6_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'jp.anthropic.claude-sonnet-4-6': {
+    defaultParams: CLAUDE_SONNET_4_6_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
+  'us.anthropic.claude-opus-4-5-20251101-v1:0': {
+    defaultParams: CLAUDE_OPUS_4_5_DEFAULT_PARAMS,
+    usecaseParams: USECASE_DEFAULT_PARAMS,
+    createConverseCommandInput: createConverseCommandInput,
+    createConverseStreamCommandInput: createConverseStreamCommandInput,
+    extractConverseOutput: extractConverseOutput,
+    extractConverseStreamOutput: extractConverseStreamOutput,
+  },
   'us.anthropic.claude-opus-4-1-20250805-v1:0': {
     defaultParams: CLAUDE_OPUS_4_DEFAULT_PARAMS,
     usecaseParams: USECASE_DEFAULT_PARAMS,

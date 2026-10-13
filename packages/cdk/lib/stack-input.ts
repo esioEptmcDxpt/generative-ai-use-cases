@@ -27,6 +27,7 @@ const baseStackInputSchema = z.object({
       diagram: z.boolean().optional(),
       meetingMinutes: z.boolean().optional(),
       voiceChat: z.boolean().optional(),
+      transcribe: z.boolean().optional(),
     })
     .default({}),
   // API
@@ -42,14 +43,14 @@ const baseStackInputSchema = z.object({
       ])
     )
     .default([
-      'us.anthropic.claude-sonnet-4-20250514-v1:0',
-      'us.anthropic.claude-opus-4-20250514-v1:0',
-      'us.anthropic.claude-3-7-sonnet-20250219-v1:0',
-      'us.anthropic.claude-3-5-haiku-20241022-v1:0',
-      'us.amazon.nova-premier-v1:0',
-      'us.amazon.nova-pro-v1:0',
-      'us.amazon.nova-lite-v1:0',
-      'us.amazon.nova-micro-v1:0',
+      'global.anthropic.claude-opus-5',
+      'global.anthropic.claude-sonnet-5',
+      'global.anthropic.claude-sonnet-4-6',
+      'global.anthropic.claude-opus-4-8',
+      'global.anthropic.claude-opus-4-7',
+      'global.anthropic.claude-opus-4-6-v1',
+      'global.anthropic.claude-haiku-4-5-20251001-v1:0',
+      'global.amazon.nova-2-lite-v1:0',
       'us.deepseek.r1-v1:0',
     ]),
   imageGenerationModelIds: z
@@ -84,7 +85,7 @@ const baseStackInputSchema = z.object({
         }),
       ])
     )
-    .default(['amazon.nova-sonic-v1:0']),
+    .default(['amazon.nova-2-sonic-v1:0']),
   endpointNames: z
     .array(
       z.union([
@@ -122,6 +123,9 @@ const baseStackInputSchema = z.object({
   // RAG KB
   ragKnowledgeBaseEnabled: z.boolean().default(false),
   ragKnowledgeBaseId: z.string().nullish(),
+  ragKnowledgeBaseStorageType: z
+    .enum(['opensearch', 's3vectors'])
+    .default('opensearch'),
   embeddingModelId: z.string().default('amazon.titan-embed-text-v2:0'),
   ragKnowledgeBaseStandbyReplicas: z.boolean().default(false),
   ragKnowledgeBaseAdvancedParsing: z.boolean().default(false),
@@ -133,6 +137,9 @@ const baseStackInputSchema = z.object({
   rerankingModelId: z.string().nullish(),
   // Agent
   agentEnabled: z.boolean().default(false),
+  agentFoundationModel: z
+    .string()
+    .default('global.anthropic.claude-sonnet-4-6'),
   searchAgentEnabled: z.boolean().default(false),
   searchApiKey: z.string().nullish(),
   searchEngine: z.enum(['Brave', 'Tavily']).default('Brave'),
@@ -158,9 +165,18 @@ const baseStackInputSchema = z.object({
         name: z.string(),
         arn: z.string(),
         description: z.string().default(''),
+        display_name: z.string().optional(),
       })
     )
     .default([]),
+  // Agent Core Network Configuration
+  agentCoreVpcId: z.string().nullish(),
+  agentCoreSubnetIds: z.array(z.string()).nullish(),
+  // Research Agent Core Runtime
+  researchAgentEnabled: z.boolean().default(false),
+  createResearchAgentFargate: z.boolean().default(false),
+  researchAgentBraveApiKey: z.string().default(''),
+  researchAgentTavilyApiKey: z.string().default(''),
   // MCP
   mcpEnabled: z.boolean().default(false),
   // Guardrail
@@ -203,19 +219,37 @@ const baseStackInputSchema = z.object({
 });
 
 // Common Validator with refine
-export const stackInputSchema = baseStackInputSchema.refine(
-  (data) => {
-    // If searchApiKey is provided, searchEngine must also be provided
-    if (data.searchApiKey && !data.searchEngine) {
-      return false;
+export const stackInputSchema = baseStackInputSchema
+  .refine(
+    (data) => {
+      // If searchApiKey is provided, searchEngine must also be provided
+      if (data.searchApiKey && !data.searchEngine) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: 'searchEngine is required when searchApiKey is provided',
+      path: ['searchEngine'],
     }
-    return true;
-  },
-  {
-    message: 'searchEngine is required when searchApiKey is provided',
-    path: ['searchEngine'],
-  }
-);
+  )
+  .refine(
+    (data) => {
+      // Validate AgentCore VPC configuration consistency
+      const hasVpcId = !!data.agentCoreVpcId;
+      const hasSubnetIds = !!(
+        data.agentCoreSubnetIds && data.agentCoreSubnetIds.length > 0
+      );
+
+      // Both must be provided or both must be empty
+      return hasVpcId === hasSubnetIds;
+    },
+    {
+      message:
+        'Both VPC ID and Subnet IDs must be provided together for AgentCore network configuration',
+      path: ['agentCoreVpcId'],
+    }
+  );
 
 // schema after conversion
 export const processedStackInputSchema = baseStackInputSchema.extend({
@@ -223,28 +257,24 @@ export const processedStackInputSchema = baseStackInputSchema.extend({
     z.object({
       modelId: z.string(),
       region: z.string(),
-      inferenceProfileArn: z.string().optional(),
     })
   ),
   imageGenerationModelIds: z.array(
     z.object({
       modelId: z.string(),
       region: z.string(),
-      inferenceProfileArn: z.string().optional(),
     })
   ),
   videoGenerationModelIds: z.array(
     z.object({
       modelId: z.string(),
       region: z.string(),
-      inferenceProfileArn: z.string().optional(),
     })
   ),
   speechToSpeechModelIds: z.array(
     z.object({
       modelId: z.string(),
       region: z.string(),
-      inferenceProfileArn: z.string().optional(),
     })
   ),
   endpointNames: z.array(
@@ -255,6 +285,8 @@ export const processedStackInputSchema = baseStackInputSchema.extend({
   ),
   // Processed agentCoreRegion (null -> modelRegion)
   agentCoreRegion: z.string(),
+  // Computed from VPC configuration (computed in parameter.ts)
+  isAgentCoreNetworkPrivate: z.boolean().optional(),
   // Branding configuration
   brandingConfig: z
     .object({
